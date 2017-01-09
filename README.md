@@ -1,2 +1,0 @@
-# QuiT
-Quick Tables

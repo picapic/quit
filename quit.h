@@ -1,4 +1,4 @@
-//Таблицы
+//РўР°Р±Р»РёС†С‹
 
 #ifndef TESTMYSQLH
 #define TESTMYSQLH

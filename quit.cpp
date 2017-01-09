@@ -1,4 +1,4 @@
-//Таблицы v1.1.7
+//РўР°Р±Р»РёС†С‹ v1.1.7
 
 #include"quit.h"
 
@@ -99,10 +99,10 @@ struct table_column {
 
 struct select_values {
 	int count;
-	int tab_index; //для формирования динамических списков полей таблиц (по-сути это id таблицы)
+	int tab_index; //РґР»СЏ С„РѕСЂРјРёСЂРѕРІР°РЅРёСЏ РґРёРЅР°РјРёС‡РµСЃРєРёС… СЃРїРёСЃРєРѕРІ РїРѕР»РµР№ С‚Р°Р±Р»РёС† (РїРѕ-СЃСѓС‚Рё СЌС‚Рѕ id С‚Р°Р±Р»РёС†С‹)
 	char *values[MAX_VALUES_IN_SELECT];
 	char *selects[MAX_VALUES_IN_SELECT];
-	select_values *svnext; //следующий список
+	select_values *svnext; //СЃР»РµРґСѓСЋС‰РёР№ СЃРїРёСЃРѕРє
 };
 
 void mysql_error_thread_exit(MYSQL * const, SOCKET * const);
@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
   fsilentmode = false;
 
 
-  //обработка аргументов и помощь по программе
+  //РѕР±СЂР°Р±РѕС‚РєР° Р°СЂРіСѓРјРµРЅС‚РѕРІ Рё РїРѕРјРѕС‰СЊ РїРѕ РїСЂРѕРіСЂР°РјРјРµ
   if(argc > 1)
   {
 	  for(k = 1; k < argc; ++k)
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
     memset(&clnt_addr, 0, sizeof(clnt_addr));
     addrlen = sizeof(clnt_addr);
 
-	//ждём соединения
+	//Р¶РґС‘Рј СЃРѕРµРґРёРЅРµРЅРёСЏ
     if((ns = accept(s, (struct sockaddr *) &clnt_addr, (socklen_t *)&addrlen)) == -1)
     {
       fprintf(stderr, "error: accept()\n");
@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "client = %s\n", inet_ntoa(clnt_addr.sin_addr));
 
 #ifdef WIN32
-    //запускаем поток обработки входящего соединения
+    //Р·Р°РїСѓСЃРєР°РµРј РїРѕС‚РѕРє РѕР±СЂР°Р±РѕС‚РєРё РІС…РѕРґСЏС‰РµРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ
     CreateThread(NULL, 0, ProcessingThread, (LPVOID)&ns, 0, &dwThread);
 #else
     stack_size = 1024*1024 + STACK_SZ*1024; //1024K + 32K
@@ -305,14 +305,14 @@ ProcessingThread(void *lpParams)
 	MYSQL_RES *res, *res_tbl, *res_col, *res_srv, *res_dsc;
 	MYSQL_ROW row, row_tbl, row_col, row_srv, row_dsc;
 	int num, num_tbl, num_col, num_srv, num_dsc;
-	char head[MAX_HEAD_SIZE];		//используется в качестве буфера!!!
-	char cmd[MAX_CMD_SIZE];		//буфер строки таблицы
-	char buf[MAX_BUFF_SIZE];		//буфер генерируемого html-документа
-	char main_table[256];	//буфер для имени текущей таблицы
-	char main_server[256];   //буфер для имени хоста
-	char next_table[256];	//буфер имени таблицы для перехода
-	char command_list[2048]; //буфер для списка команд
-	int nbytes, nsumbytes;		//количество принятых/отправленных байт
+	char head[MAX_HEAD_SIZE];		//РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РІ РєР°С‡РµСЃС‚РІРµ Р±СѓС„РµСЂР°!!!
+	char cmd[MAX_CMD_SIZE];		//Р±СѓС„РµСЂ СЃС‚СЂРѕРєРё С‚Р°Р±Р»РёС†С‹
+	char buf[MAX_BUFF_SIZE];		//Р±СѓС„РµСЂ РіРµРЅРµСЂРёСЂСѓРµРјРѕРіРѕ html-РґРѕРєСѓРјРµРЅС‚Р°
+	char main_table[256];	//Р±СѓС„РµСЂ РґР»СЏ РёРјРµРЅРё С‚РµРєСѓС‰РµР№ С‚Р°Р±Р»РёС†С‹
+	char main_server[256];   //Р±СѓС„РµСЂ РґР»СЏ РёРјРµРЅРё С…РѕСЃС‚Р°
+	char next_table[256];	//Р±СѓС„РµСЂ РёРјРµРЅРё С‚Р°Р±Р»РёС†С‹ РґР»СЏ РїРµСЂРµС…РѕРґР°
+	char command_list[2048]; //Р±СѓС„РµСЂ РґР»СЏ СЃРїРёСЃРєР° РєРѕРјР°РЅРґ
+	int nbytes, nsumbytes;		//РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРёРЅСЏС‚С‹С…/РѕС‚РїСЂР°РІР»РµРЅРЅС‹С… Р±Р°Р№С‚
 	char *send_data;
 	size_t nbytes_sent, size_to_send;
 	bool ffirst, fselects, fdynamic, fnodelim, fdelrow, fnewtable;
@@ -321,16 +321,16 @@ ProcessingThread(void *lpParams)
 	int len, max, data_size;
 	char *ptr, *port_ptr, *ptr_del;
 	struct id_value_data_struct id_value_data;
-	struct table_column *tab_col[MAX_COLUMNS_IN_TABLE]; //накладывается ограничение на количество столбцов в таблице
+	struct table_column *tab_col[MAX_COLUMNS_IN_TABLE]; //РЅР°РєР»Р°РґС‹РІР°РµС‚СЃСЏ РѕРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РѕР»Р±С†РѕРІ РІ С‚Р°Р±Р»РёС†Рµ
 	char Author[]="Bombo";
 
-	fselects = false; //начальная инициализация флага "таблица содержит поля выбора"
-	fdynamic = false; // -||- "таблица содержит поля выборки"
-	fdelrow = false;  // -||- "удалить строки"
-	fnewtable = false;// -||- "создаётся новая таблица"
+	fselects = false; //РЅР°С‡Р°Р»СЊРЅР°СЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ С„Р»Р°РіР° "С‚Р°Р±Р»РёС†Р° СЃРѕРґРµСЂР¶РёС‚ РїРѕР»СЏ РІС‹Р±РѕСЂР°"
+	fdynamic = false; // -||- "С‚Р°Р±Р»РёС†Р° СЃРѕРґРµСЂР¶РёС‚ РїРѕР»СЏ РІС‹Р±РѕСЂРєРё"
+	fdelrow = false;  // -||- "СѓРґР°Р»РёС‚СЊ СЃС‚СЂРѕРєРё"
+	fnewtable = false;// -||- "СЃРѕР·РґР°С‘С‚СЃСЏ РЅРѕРІР°СЏ С‚Р°Р±Р»РёС†Р°"
 
 	ns = *((SOCKET *)lpParams);
-	area_width = 20; //ширина столбца в символах
+	area_width = 20; //С€РёСЂРёРЅР° СЃС‚РѕР»Р±С†Р° РІ СЃРёРјРІРѕР»Р°С…
   max = 0;
 
   Author[0] = 'B'; //non warning
@@ -368,7 +368,7 @@ ProcessingThread(void *lpParams)
 	mysql_query(&mysql, "SET @@character_set_connection='cp1251'");
 	mysql_query(&mysql, "SET @@character_set_result='cp1251'");
 	mysql_query(&mysql, "SET @@character_set_client='cp1251'");
-//	mysql_query(&mysql, "set sql_mode='NO_BACKSLASH_ESCAPES'"); //чтобы MySQL не ругался на '\'
+//	mysql_query(&mysql, "set sql_mode='NO_BACKSLASH_ESCAPES'"); //С‡С‚РѕР±С‹ MySQL РЅРµ СЂСѓРіР°Р»СЃСЏ РЅР° '\'
 
 	memset(buf, 0, sizeof(buf));
 	nbytes = 0;
@@ -388,7 +388,7 @@ ProcessingThread(void *lpParams)
     pthread_exit(NULL);
 #endif	  
 	}
-  fprintf(stderr, "\n\n%s\n\n", buf); //отладка!!!
+  fprintf(stderr, "\n\n%s\n\n", buf); //РѕС‚Р»Р°РґРєР°!!!
   if(strncmp(buf, "POST ", 5) == 0)
   {
 	  ptr = strstr(buf, "Content-Length: ");
@@ -400,7 +400,7 @@ ProcessingThread(void *lpParams)
 		 		data_size = (ptr_del-buf)/sizeof(char)+4+atoi(ptr+16);
 		 	}
 	  }
-//	  fprintf(stderr, "\n\natoi(ptr+16)=%d\nlen=%d\ndata_size=%d\n\n", atoi(ptr+16),strlen(buf)-((ptr_del-buf)/sizeof(char)+4),data_size); //отладка!!!
+//	  fprintf(stderr, "\n\natoi(ptr+16)=%d\nlen=%d\ndata_size=%d\n\n", atoi(ptr+16),strlen(buf)-((ptr_del-buf)/sizeof(char)+4),data_size); //РѕС‚Р»Р°РґРєР°!!!
 
 		while((unsigned int)nsumbytes < sizeof(buf) && (unsigned int)nsumbytes < (unsigned int)data_size)
 		{
@@ -409,7 +409,7 @@ ProcessingThread(void *lpParams)
 		}
   }
   
-//	fprintf(stderr, "\nrecv_buf = %s\n\n\n", buf); //отладка!!!
+//	fprintf(stderr, "\nrecv_buf = %s\n\n\n", buf); //РѕС‚Р»Р°РґРєР°!!!
 	if(nsumbytes <= 0)
 	{
 		fprintf(stderr, "nsumbytes <= 0\n");
@@ -424,35 +424,35 @@ ProcessingThread(void *lpParams)
 	if(strncmp(buf, "POST ", 5) == 0)
 	{
 	  ptr = get_head_value(buf, "POST /");
-	  //получаем название основной таблицы
+	  //РїРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ РѕСЃРЅРѕРІРЅРѕР№ С‚Р°Р±Р»РёС†С‹
 	  memset(main_table, 0, sizeof(main_table));
 	  for(i = 0; ptr[i] != ' '; ++i)
 	  {
 		  main_table[i] = ptr[i];
 	  }
 
-	  //задаём название основной таблицы как название таблицы для перехода
+	  //Р·Р°РґР°С‘Рј РЅР°Р·РІР°РЅРёРµ РѕСЃРЅРѕРІРЅРѕР№ С‚Р°Р±Р»РёС†С‹ РєР°Рє РЅР°Р·РІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹ РґР»СЏ РїРµСЂРµС…РѕРґР°
 	  memset(next_table, 0, sizeof(next_table));
 	  strcpy_s(next_table, sizeof(next_table), main_table);
 
-	  //получаем длину передпнного сообщения
+	  //РїРѕР»СѓС‡Р°РµРј РґР»РёРЅСѓ РїРµСЂРµРґРїРЅРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ
 	  ptr = get_head_value(buf, "Content-Length: ");
 	  if(ptr == NULL)
 		len = 0;
 	  else
 		len = atoi(ptr);
 	  
-	  //если сообщение не пустое - производим его разбор
-	  //менять порядок разбора строго не рекомендуется
+	  //РµСЃР»Рё СЃРѕРѕР±С‰РµРЅРёРµ РЅРµ РїСѓСЃС‚РѕРµ - РїСЂРѕРёР·РІРѕРґРёРј РµРіРѕ СЂР°Р·Р±РѕСЂ
+	  //РјРµРЅСЏС‚СЊ РїРѕСЂСЏРґРѕРє СЂР°Р·Р±РѕСЂР° СЃС‚СЂРѕРіРѕ РЅРµ СЂРµРєРѕРјРµРЅРґСѓРµС‚СЃСЏ
 	  if(len > 0)
 	  {
 	    ptr = strstr(buf, "\r\n\r\n");
-	    ptr += 4; //устанавливаем на начало данных
+	    ptr += 4; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР° РЅР°С‡Р°Р»Рѕ РґР°РЅРЅС‹С…
 
 		memset(cmd, 0, sizeof(cmd));
-		while(get_some_value(ptr, "make_some_request", cmd)) //получаем текст запроса
+		while(get_some_value(ptr, "make_some_request", cmd)) //РїРѕР»СѓС‡Р°РµРј С‚РµРєСЃС‚ Р·Р°РїСЂРѕСЃР°
 		{
-			//выполняем запрос
+			//РІС‹РїРѕР»РЅСЏРµРј Р·Р°РїСЂРѕСЃ
 			if(mysql_query(&mysql, cmd) != 0)
 			{
 				mysql_error_thread_exit(&mysql, &ns);
@@ -460,16 +460,16 @@ ProcessingThread(void *lpParams)
 		}
 
 		memset(cmd, 0, sizeof(cmd));
-		if(get_some_value(ptr, "delete_table_from_database", cmd)) //получаем текст запроса на добавление значения
+		if(get_some_value(ptr, "delete_table_from_database", cmd)) //РїРѕР»СѓС‡Р°РµРј С‚РµРєСЃС‚ Р·Р°РїСЂРѕСЃР° РЅР° РґРѕР±Р°РІР»РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ
 		{
-			//удаляем таблицу
+			//СѓРґР°Р»СЏРµРј С‚Р°Р±Р»РёС†Сѓ
 			delete_table(cmd, &mysql, &ns);
 		}
 
 		memset(cmd, 0, sizeof(cmd));
-		if(get_some_value(ptr, "insert_new_default_value", cmd)) //получаем текст запроса на добавление значения
+		if(get_some_value(ptr, "insert_new_default_value", cmd)) //РїРѕР»СѓС‡Р°РµРј С‚РµРєСЃС‚ Р·Р°РїСЂРѕСЃР° РЅР° РґРѕР±Р°РІР»РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ
 		{
-			//добавляем строку в таблицу
+			//РґРѕР±Р°РІР»СЏРµРј СЃС‚СЂРѕРєСѓ РІ С‚Р°Р±Р»РёС†Сѓ
 			if(mysql_query(&mysql, cmd) != 0)
 			{
 				mysql_error_thread_exit(&mysql, &ns);
@@ -477,26 +477,26 @@ ProcessingThread(void *lpParams)
 		}
 
 	    memset(cmd, 0, sizeof(cmd));
-		if(get_some_value(ptr, "next_table_name", cmd)) //получаем имя таблицы для перехода
+		if(get_some_value(ptr, "next_table_name", cmd)) //РїРѕР»СѓС‡Р°РµРј РёРјСЏ С‚Р°Р±Р»РёС†С‹ РґР»СЏ РїРµСЂРµС…РѕРґР°
 		{
 			if(strlen(cmd) > 0)
 			{
 				memset(next_table, 0, sizeof(next_table));
-				strcpy_s(next_table, sizeof(next_table), cmd); //если была задана таблица для перехода, запоминаем её имя
+				strcpy_s(next_table, sizeof(next_table), cmd); //РµСЃР»Рё Р±С‹Р»Р° Р·Р°РґР°РЅР° С‚Р°Р±Р»РёС†Р° РґР»СЏ РїРµСЂРµС…РѕРґР°, Р·Р°РїРѕРјРёРЅР°РµРј РµС‘ РёРјСЏ
 			}
 		}
 
-		if(get_some_value(ptr, "delete_row_mode", cmd)) //режим удаления строк
+		if(get_some_value(ptr, "delete_row_mode", cmd)) //СЂРµР¶РёРј СѓРґР°Р»РµРЅРёСЏ СЃС‚СЂРѕРє
 		{
 			if(strlen(cmd) > 0 && strncmp(cmd, "yes", 3) == 0)
 			{
-				fdelrow = true; //задаём возможность удаления строк
+				fdelrow = true; //Р·Р°РґР°С‘Рј РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ СѓРґР°Р»РµРЅРёСЏ СЃС‚СЂРѕРє
 			}
 		}
 
 	    memset(cmd, 0, sizeof(cmd));
 		memset(command_list, 0, sizeof(command_list));
-		if(get_some_value(ptr, "command_list", cmd)) //получаем список команд
+		if(get_some_value(ptr, "command_list", cmd)) //РїРѕР»СѓС‡Р°РµРј СЃРїРёСЃРѕРє РєРѕРјР°РЅРґ
 		{
 			strcpy_s(command_list, sizeof(command_list), cmd);
 
@@ -506,25 +506,25 @@ ProcessingThread(void *lpParams)
 			}
 		}
 
-		len = strlen(ptr); //т.к. содержимое ptr может измениться
+		len = strlen(ptr); //С‚.Рє. СЃРѕРґРµСЂР¶РёРјРѕРµ ptr РјРѕР¶РµС‚ РёР·РјРµРЅРёС‚СЊСЃСЏ
 		
 		while(len > 0)
 		{
-	      len = get_id_value(ptr, &id_value_data); //функция определяет id изменяемого элемента, имя столбца и новое значение. 
-		                                           //возвращает оставшуюся длину сообщения.
-												   //заодно убирает %XX, переделывает кавычки, ищет таблицу для перехода.
+	      len = get_id_value(ptr, &id_value_data); //С„СѓРЅРєС†РёСЏ РѕРїСЂРµРґРµР»СЏРµС‚ id РёР·РјРµРЅСЏРµРјРѕРіРѕ СЌР»РµРјРµРЅС‚Р°, РёРјСЏ СЃС‚РѕР»Р±С†Р° Рё РЅРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ. 
+		                                           //РІРѕР·РІСЂР°С‰Р°РµС‚ РѕСЃС‚Р°РІС€СѓСЋСЃСЏ РґР»РёРЅСѓ СЃРѕРѕР±С‰РµРЅРёСЏ.
+												   //Р·Р°РѕРґРЅРѕ СѓР±РёСЂР°РµС‚ %XX, РїРµСЂРµРґРµР»С‹РІР°РµС‚ РєР°РІС‹С‡РєРё, РёС‰РµС‚ С‚Р°Р±Р»РёС†Сѓ РґР»СЏ РїРµСЂРµС…РѕРґР°.
 //		  fprintf(stderr, "len = %d\n", len);
 		  if(len < 0) continue;
 		  ptr = ptr + id_value_data.index;
 		  memset(cmd, 0, sizeof(cmd));
-		  if(strncmp(main_table, "server_info", 11) == 0 && strncmp(id_value_data.name, "addr", 4) == 0) //если меняется адрес сервера
+		  if(strncmp(main_table, "server_info", 11) == 0 && strncmp(id_value_data.name, "addr", 4) == 0) //РµСЃР»Рё РјРµРЅСЏРµС‚СЃСЏ Р°РґСЂРµСЃ СЃРµСЂРІРµСЂР°
 		  {
-			  //проверяем, рабочий ли этот адрес
+			  //РїСЂРѕРІРµСЂСЏРµРј, СЂР°Р±РѕС‡РёР№ Р»Рё СЌС‚РѕС‚ Р°РґСЂРµСЃ
 			  fprintf(stderr, "checking...\n");
 			  memset(main_server, 0, sizeof(main_server));
 			  strncpy(main_server, id_value_data.value, strlen(id_value_data.value));
 			  
-			  //создаём сокет
+			  //СЃРѕР·РґР°С‘Рј СЃРѕРєРµС‚
 			  if((check_s = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			  {
 				fprintf(stderr, "error: socket()\n");
@@ -542,7 +542,7 @@ ProcessingThread(void *lpParams)
 			  clnt_addr.sin_family = AF_INET;
 			  clnt_addr.sin_addr.s_addr = INADDR_ANY;
 
-			  //выделяем номер порта в адресе (если указан, по-умолчанию 80)
+			  //РІС‹РґРµР»СЏРµРј РЅРѕРјРµСЂ РїРѕСЂС‚Р° РІ Р°РґСЂРµСЃРµ (РµСЃР»Рё СѓРєР°Р·Р°РЅ, РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ 80)
 			  nport = 80;
 			  nport = htons((u_short)nport);
 			  port_ptr = strstr(main_server, ":");
@@ -551,10 +551,10 @@ ProcessingThread(void *lpParams)
 			  else
 			  {
 				  clnt_addr.sin_port = htons((u_short)atoi(port_ptr+1));
-				  port_ptr[0] = '\0'; //убираем двоеточие
+				  port_ptr[0] = '\0'; //СѓР±РёСЂР°РµРј РґРІРѕРµС‚РѕС‡РёРµ
 			  }
 
-			  //находим ip-адрес сервера (если задано имя хоста)
+			  //РЅР°С…РѕРґРёРј ip-Р°РґСЂРµСЃ СЃРµСЂРІРµСЂР° (РµСЃР»Рё Р·Р°РґР°РЅРѕ РёРјСЏ С…РѕСЃС‚Р°)
 			  if(port_ptr != NULL)
 				fprintf(stderr, "host: %s:%d\n", main_server, atoi(port_ptr+1));
 			  else
@@ -572,16 +572,16 @@ ProcessingThread(void *lpParams)
 				  break;
 			  }
 
-			  memcpy(&(clnt_addr.sin_addr), hp->h_addr, hp->h_length); //копируем полученный адрес в структуру адреса прокси-клиента
-			  clnt_addr.sin_family = hp->h_addrtype; //копируем тип
+			  memcpy(&(clnt_addr.sin_addr), hp->h_addr, hp->h_length); //РєРѕРїРёСЂСѓРµРј РїРѕР»СѓС‡РµРЅРЅС‹Р№ Р°РґСЂРµСЃ РІ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р°РґСЂРµСЃР° РїСЂРѕРєСЃРё-РєР»РёРµРЅС‚Р°
+			  clnt_addr.sin_family = hp->h_addrtype; //РєРѕРїРёСЂСѓРµРј С‚РёРї
 
-			  //подключаемся к указанному серверу
-			  //если подключение прошло успешно - выполняем команду
-			  //(можно ещё тестовый запрос отправить на получение заголовка таблицы по-умолчанию)
-			  //иначе - пропускаем
+			  //РїРѕРґРєР»СЋС‡Р°РµРјСЃСЏ Рє СѓРєР°Р·Р°РЅРЅРѕРјСѓ СЃРµСЂРІРµСЂСѓ
+			  //РµСЃР»Рё РїРѕРґРєР»СЋС‡РµРЅРёРµ РїСЂРѕС€Р»Рѕ СѓСЃРїРµС€РЅРѕ - РІС‹РїРѕР»РЅСЏРµРј РєРѕРјР°РЅРґСѓ
+			  //(РјРѕР¶РЅРѕ РµС‰С‘ С‚РµСЃС‚РѕРІС‹Р№ Р·Р°РїСЂРѕСЃ РѕС‚РїСЂР°РІРёС‚СЊ РЅР° РїРѕР»СѓС‡РµРЅРёРµ Р·Р°РіРѕР»РѕРІРєР° С‚Р°Р±Р»РёС†С‹ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ)
+			  //РёРЅР°С‡Рµ - РїСЂРѕРїСѓСЃРєР°РµРј
 			  if(connect(check_s, (struct sockaddr *) &clnt_addr, sizeof(clnt_addr)) != -1)
 			  {
-				  //проверяем, какой это сервер
+				  //РїСЂРѕРІРµСЂСЏРµРј, РєР°РєРѕР№ СЌС‚Рѕ СЃРµСЂРІРµСЂ
 				  //...
 
 				  sprintf_s(cmd, sizeof(cmd), "UPDATE %s SET %s=\"%s\" WHERE id=%d", main_table, id_value_data.name, id_value_data.value, id_value_data.id);
@@ -599,7 +599,7 @@ ProcessingThread(void *lpParams)
 				  delete [] id_value_data.value;
 			      fprintf(stderr, "The check is failed (connect())\n");
 			  }
-			  //удаляем сокет
+			  //СѓРґР°Р»СЏРµРј СЃРѕРєРµС‚
 			  closesocket(check_s);
 		  }
 		  else
@@ -614,14 +614,14 @@ ProcessingThread(void *lpParams)
 			  }
 		  }
 		}
-		run_commands(command_list, &mysql, &ns); //выполняем переданные команды
+		run_commands(command_list, &mysql, &ns); //РІС‹РїРѕР»РЅСЏРµРј РїРµСЂРµРґР°РЅРЅС‹Рµ РєРѕРјР°РЅРґС‹
 	  }
 	}
 
-	if(fnewtable) //получаем имя новой таблицы
+	if(fnewtable) //РїРѕР»СѓС‡Р°РµРј РёРјСЏ РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
 	{
 		memset(cmd, 0, MAX_BUFF_SIZE);
-		//здесь получаем название новой таблицы
+		//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РЅР°Р·РІР°РЅРёРµ РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
 		sprintf_s(cmd, MAX_BUFF_SIZE, "SELECT new_tab_name FROM new_table_info");
 		if(mysql_query(&mysql, cmd) != 0)
 		{
@@ -643,12 +643,12 @@ ProcessingThread(void *lpParams)
 		}
 	}
 
-	//заменяем основную таблицу на таблицу для перехода
+	//Р·Р°РјРµРЅСЏРµРј РѕСЃРЅРѕРІРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ РЅР° С‚Р°Р±Р»РёС†Сѓ РґР»СЏ РїРµСЂРµС…РѕРґР°
     memset(main_table, 0, sizeof(main_table));
     strcpy_s(main_table, sizeof(main_table), next_table);
 	
 	memset(cmd, 0, sizeof(cmd));
-	//здесь получаем описание сервера
+	//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РѕРїРёСЃР°РЅРёРµ СЃРµСЂРІРµСЂР°
 	sprintf_s(cmd, sizeof(cmd), "SELECT id,addr,default_index,col_width,col_width_min,addr_default FROM server_info");
 	if(mysql_query(&mysql, cmd) != 0)
 	{
@@ -714,9 +714,9 @@ ProcessingThread(void *lpParams)
 	  }
 	}
 
-//--------------------------------------------------------------ПОЛУЧАЕМ ДАННЫЕ О ТАБЛИЦЕ---------------------------------------------
+//--------------------------------------------------------------РџРћР›РЈР§РђР•Рњ Р”РђРќРќР«Р• Рћ РўРђР‘Р›РР¦Р•---------------------------------------------
 
-	//здесь получаем описание столбцов таблицы
+	//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, sizeof(cmd), "\
 SELECT a.id,a.col_name,a.col_type,a.html_code,a.html_hat,a.col_hat,a.col_size,a.col_sort \
 FROM tab_columns a \
@@ -737,53 +737,53 @@ ORDER BY a.col_num", main_table);
 	{
 		memset(tab_col, NULL, sizeof(tab_col));
 		i = 0;
-		//получаем данные о столбцах и сохраняем всё в кэш
+		//РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ Рѕ СЃС‚РѕР»Р±С†Р°С… Рё СЃРѕС…СЂР°РЅСЏРµРј РІСЃС‘ РІ РєСЌС€
 		while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		{
 			tab_col[i] = new table_column;
 
-			//ключ
+			//РєР»СЋС‡
 			tab_col[i]->id = atoi(row_col[0]);
 
-			//имя столбца
+			//РёРјСЏ СЃС‚РѕР»Р±С†Р°
 			tab_col[i]->name = new char[strlen(row_col[1])+1];
 			memset(tab_col[i]->name, 0, strlen(row_col[1])+1);
 			strcpy(tab_col[i]->name, row_col[1]);
 
-			//тип столбца
+			//С‚РёРї СЃС‚РѕР»Р±С†Р°
 			tab_col[i]->type = atoi(row_col[2]);
 
-			//код строки
+			//РєРѕРґ СЃС‚СЂРѕРєРё
 			tab_col[i]->html_code = new char[strlen(row_col[3])+1];
 			memset(tab_col[i]->html_code, 0, strlen(row_col[3])+1);
 			strcpy(tab_col[i]->html_code, row_col[3]);
 
-			//код заголовка столбца
+			//РєРѕРґ Р·Р°РіРѕР»РѕРІРєР° СЃС‚РѕР»Р±С†Р°
 			tab_col[i]->html_hat = new char[strlen(row_col[4])+1];
 			memset(tab_col[i]->html_hat, 0, strlen(row_col[4])+1);
 			strcpy(tab_col[i]->html_hat, row_col[4]);
 
-			//заголовок столбца в таблице
+			//Р·Р°РіРѕР»РѕРІРѕРє СЃС‚РѕР»Р±С†Р° РІ С‚Р°Р±Р»РёС†Рµ
 			tab_col[i]->col_hat = new char[strlen(row_col[5])+1];
 			memset(tab_col[i]->col_hat, 0, strlen(row_col[5])+1);
 			strcpy(tab_col[i]->col_hat, row_col[5]);
 
-			//ширина столбца в таблице
+			//С€РёСЂРёРЅР° СЃС‚РѕР»Р±С†Р° РІ С‚Р°Р±Р»РёС†Рµ
 			tab_col[i]->col_size = atoi(row_col[6]);
 
-			//сортировка по этому столбцу
+			//СЃРѕСЂС‚РёСЂРѕРІРєР° РїРѕ СЌС‚РѕРјСѓ СЃС‚РѕР»Р±С†Сѓ
 			tab_col[i]->sort = atoi(row_col[7]);
 
-			//выборка ячеек для столбца
+			//РІС‹Р±РѕСЂРєР° СЏС‡РµРµРє РґР»СЏ СЃС‚РѕР»Р±С†Р°
 			tab_col[i]->desc = 0;
 
-			//порядковый номер столбца с таблицами, из которого формируется выборка
+			//РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚РѕР»Р±С†Р° СЃ С‚Р°Р±Р»РёС†Р°РјРё, РёР· РєРѕС‚РѕСЂРѕРіРѕ С„РѕСЂРјРёСЂСѓРµС‚СЃСЏ РІС‹Р±РѕСЂРєР°
 			tab_col[i]->col_desc_id = 0;
 
-			//обнулляем ссылку на значения выбора
+			//РѕР±РЅСѓР»Р»СЏРµРј СЃСЃС‹Р»РєСѓ РЅР° Р·РЅР°С‡РµРЅРёСЏ РІС‹Р±РѕСЂР°
 			tab_col[i]->selects = NULL;
 
-			//обнулляем ссылку на значения динамического выбора
+			//РѕР±РЅСѓР»Р»СЏРµРј СЃСЃС‹Р»РєСѓ РЅР° Р·РЅР°С‡РµРЅРёСЏ РґРёРЅР°РјРёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР°
 			tab_col[i]->dynamic = NULL;
 
 			i++;
@@ -796,26 +796,26 @@ ORDER BY a.col_num", main_table);
 		sprintf_s(head, sizeof(head), "error database: no such table '%s' in tab_columns", main_table);
 	    error_thread_exit(&mysql, &ns, head);
 	}
-	cols_num = i; //запоминаем количество столбцов в выводимой таблице
+	cols_num = i; //Р·Р°РїРѕРјРёРЅР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ СЃС‚РѕР»Р±С†РѕРІ РІ РІС‹РІРѕРґРёРјРѕР№ С‚Р°Р±Р»РёС†Рµ
 
-    mysql_free_result(res_col); //можно, т.к. все данные уже в кэше
+    mysql_free_result(res_col); //РјРѕР¶РЅРѕ, С‚.Рє. РІСЃРµ РґР°РЅРЅС‹Рµ СѓР¶Рµ РІ РєСЌС€Рµ
 
-	//определим ячейки (столбцы), требующие подготовки к выводу
+	//РѕРїСЂРµРґРµР»РёРј СЏС‡РµР№РєРё (СЃС‚РѕР»Р±С†С‹), С‚СЂРµР±СѓСЋС‰РёРµ РїРѕРґРіРѕС‚РѕРІРєРё Рє РІС‹РІРѕРґСѓ
 	for(i = 0; i < cols_num; ++i)
 	{
-		if(tab_col[i]->type == 3) //если это поле с выбором значений
+		if(tab_col[i]->type == 3) //РµСЃР»Рё СЌС‚Рѕ РїРѕР»Рµ СЃ РІС‹Р±РѕСЂРѕРј Р·РЅР°С‡РµРЅРёР№
 		{
-			fselects = true; //установим флаг загрузки значений выбора
+			fselects = true; //СѓСЃС‚Р°РЅРѕРІРёРј С„Р»Р°Рі Р·Р°РіСЂСѓР·РєРё Р·РЅР°С‡РµРЅРёР№ РІС‹Р±РѕСЂР°
 		}
-		else if(tab_col[i]->type == 9) //если это поле с динамическим выбором значений
+		else if(tab_col[i]->type == 9) //РµСЃР»Рё СЌС‚Рѕ РїРѕР»Рµ СЃ РґРёРЅР°РјРёС‡РµСЃРєРёРј РІС‹Р±РѕСЂРѕРј Р·РЅР°С‡РµРЅРёР№
 		{
-			fdynamic = true; //установим флаг загрузки значений динамического выбора
+			fdynamic = true; //СѓСЃС‚Р°РЅРѕРІРёРј С„Р»Р°Рі Р·Р°РіСЂСѓР·РєРё Р·РЅР°С‡РµРЅРёР№ РґРёРЅР°РјРёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР°
 		}
 	}
 
-	if(fselects) //если в таблице присутствуют поля выбора - подготовим их к выводу
+	if(fselects) //РµСЃР»Рё РІ С‚Р°Р±Р»РёС†Рµ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚ РїРѕР»СЏ РІС‹Р±РѕСЂР° - РїРѕРґРіРѕС‚РѕРІРёРј РёС… Рє РІС‹РІРѕРґСѓ
 	{
-		//получаем значения всех полей выбора заданной таблицы
+		//РїРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёСЏ РІСЃРµС… РїРѕР»РµР№ РІС‹Р±РѕСЂР° Р·Р°РґР°РЅРЅРѕР№ С‚Р°Р±Р»РёС†С‹
 		sprintf_s(cmd, sizeof(cmd), "\
 SELECT a.col_name,a.value_of_select \
 FROM tab_selects a \
@@ -834,7 +834,7 @@ WHERE b.tab_name='%s'", main_table);
 			num_tbl = mysql_affected_rows(&mysql);
 		}
 
-		//преобразуем значение поля выбора в список (значение->строка_выбора)
+		//РїСЂРµРѕР±СЂР°Р·СѓРµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ РІС‹Р±РѕСЂР° РІ СЃРїРёСЃРѕРє (Р·РЅР°С‡РµРЅРёРµ->СЃС‚СЂРѕРєР°_РІС‹Р±РѕСЂР°)
 		if(num_tbl > 0)
 		{
 			while(num_tbl > 0)
@@ -851,85 +851,85 @@ WHERE b.tab_name='%s'", main_table);
 				{
 					if(strcmp(tab_col[i]->name, row_tbl[0]) == 0)
 					{
-						//определяем длину поля со значениями выбора
+						//РѕРїСЂРµРґРµР»СЏРµРј РґР»РёРЅСѓ РїРѕР»СЏ СЃРѕ Р·РЅР°С‡РµРЅРёСЏРјРё РІС‹Р±РѕСЂР°
 						len = strlen(row_tbl[1]);
-						//создаём новую структуру с выбором для текущего поля
+						//СЃРѕР·РґР°С‘Рј РЅРѕРІСѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ СЃ РІС‹Р±РѕСЂРѕРј РґР»СЏ С‚РµРєСѓС‰РµРіРѕ РїРѕР»СЏ
 						tab_col[i]->selects = new select_values;
-						//обнуляем созданную структуру
+						//РѕР±РЅСѓР»СЏРµРј СЃРѕР·РґР°РЅРЅСѓСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ
 						memset(tab_col[i]->selects, 0, sizeof(select_values));
-						//воспользуемся буфером (для начала обнулим)
+						//РІРѕСЃРїРѕР»СЊР·СѓРµРјСЃСЏ Р±СѓС„РµСЂРѕРј (РґР»СЏ РЅР°С‡Р°Р»Р° РѕР±РЅСѓР»РёРј)
 						memset(buf, 0, sizeof(buf));
-						//отрицаем отсутствие разделителя
+						//РѕС‚СЂРёС†Р°РµРј РѕС‚СЃСѓС‚СЃС‚РІРёРµ СЂР°Р·РґРµР»РёС‚РµР»СЏ
 						fnodelim = false;
-						//заполняем структуру значениями
+						//Р·Р°РїРѕР»РЅСЏРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ Р·РЅР°С‡РµРЅРёСЏРјРё
 						for(j = 0, k = 0, l = 0, m = 0; j < len; ++j)
 						{
 							switch(m)
 							{
-								case 0: //ищем значение поля
+								case 0: //РёС‰РµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ
 									{
-										//проверяем, есть ли в списке сочетание символов "::"
+										//РїСЂРѕРІРµСЂСЏРµРј, РµСЃС‚СЊ Р»Рё РІ СЃРїРёСЃРєРµ СЃРѕС‡РµС‚Р°РЅРёРµ СЃРёРјРІРѕР»РѕРІ "::"
 										if(fnodelim || strstr(row_tbl[1], "::") == NULL)
 										{
-											//если нету "::", создаём значение поля автоматически (по порядку, начиная с 0)
+											//РµСЃР»Рё РЅРµС‚Сѓ "::", СЃРѕР·РґР°С‘Рј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРё (РїРѕ РїРѕСЂСЏРґРєСѓ, РЅР°С‡РёРЅР°СЏ СЃ 0)
 											sprintf_s(buf, sizeof(buf), "%d", l);
 											fnodelim = true;
 										}
-										else if(row_tbl[1][j] != ':') //если текущий символ не ':', пополняем им буфер
+										else if(row_tbl[1][j] != ':') //РµСЃР»Рё С‚РµРєСѓС‰РёР№ СЃРёРјРІРѕР» РЅРµ ':', РїРѕРїРѕР»РЅСЏРµРј РёРј Р±СѓС„РµСЂ
 										{
 											buf[k++] = row_tbl[1][j];
 											continue;
 										}
-										else if(j < (len - 1) && row_tbl[1][j+1] != ':') //если встретился одиночный символ ':', пополняем им буфер
+										else if(j < (len - 1) && row_tbl[1][j+1] != ':') //РµСЃР»Рё РІСЃС‚СЂРµС‚РёР»СЃСЏ РѕРґРёРЅРѕС‡РЅС‹Р№ СЃРёРјРІРѕР» ':', РїРѕРїРѕР»РЅСЏРµРј РёРј Р±СѓС„РµСЂ
 										{
 											buf[k++] = row_tbl[1][j];
 											continue;
 										}
-										//инициализируем значение выбора
+										//РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј Р·РЅР°С‡РµРЅРёРµ РІС‹Р±РѕСЂР°
 										tab_col[i]->selects->values[l] = new char[strlen(buf)+1];
 										memset(tab_col[i]->selects->values[l], 0, strlen(buf)+1);
 										strcpy_s(tab_col[i]->selects->values[l], strlen(buf)+1, buf);
-										//очищаем буфер
+										//РѕС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
 										memset(buf, 0, sizeof(buf));
-										//гарантируем присутствие строки для выбора
+										//РіР°СЂР°РЅС‚РёСЂСѓРµРј РїСЂРёСЃСѓС‚СЃС‚РІРёРµ СЃС‚СЂРѕРєРё РґР»СЏ РІС‹Р±РѕСЂР°
 										tab_col[i]->selects->selects[l] = new char[2];
 										memset(tab_col[i]->selects->selects[l], 0, 2);
 										if(fnodelim)
-											j--; //если нету разделителя, остаёмся на месте и не переходим по строке выбора
+											j--; //РµСЃР»Рё РЅРµС‚Сѓ СЂР°Р·РґРµР»РёС‚РµР»СЏ, РѕСЃС‚Р°С‘РјСЃСЏ РЅР° РјРµСЃС‚Рµ Рё РЅРµ РїРµСЂРµС…РѕРґРёРј РїРѕ СЃС‚СЂРѕРєРµ РІС‹Р±РѕСЂР°
 										else
 											j++;
-										k = 0; //указатель позиции буфера
-										m = 1; //тип действия
+										k = 0; //СѓРєР°Р·Р°С‚РµР»СЊ РїРѕР·РёС†РёРё Р±СѓС„РµСЂР°
+										m = 1; //С‚РёРї РґРµР№СЃС‚РІРёСЏ
 									}
 									break;
-								case 1: //ищем строку, отображаемую при выборе
+								case 1: //РёС‰РµРј СЃС‚СЂРѕРєСѓ, РѕС‚РѕР±СЂР°Р¶Р°РµРјСѓСЋ РїСЂРё РІС‹Р±РѕСЂРµ
 									{
 										if(row_tbl[1][j] != '\r' && row_tbl[1][j] != '\n')
 										{
 											buf[k++] = row_tbl[1][j];
-											//чтобы не надо было обязательно заканчивать описание выбора переносом строки
+											//С‡С‚РѕР±С‹ РЅРµ РЅР°РґРѕ Р±С‹Р»Рѕ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ Р·Р°РєР°РЅС‡РёРІР°С‚СЊ РѕРїРёСЃР°РЅРёРµ РІС‹Р±РѕСЂР° РїРµСЂРµРЅРѕСЃРѕРј СЃС‚СЂРѕРєРё
 											if(j < (len-1))
 												continue;
 										}
 
-										//удаляем прежнюю заглушку
+										//СѓРґР°Р»СЏРµРј РїСЂРµР¶РЅСЋСЋ Р·Р°РіР»СѓС€РєСѓ
 										if(tab_col[i]->selects->selects[l] != NULL)
 											delete [] tab_col[i]->selects->selects[l];
 
-										//инициализируем строку для выбора
+										//РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃС‚СЂРѕРєСѓ РґР»СЏ РІС‹Р±РѕСЂР°
 										tab_col[i]->selects->selects[l] = new char[strlen(buf)+1];
 										memset(tab_col[i]->selects->selects[l], 0, strlen(buf)+1);
 										strcpy_s(tab_col[i]->selects->selects[l], strlen(buf)+1, buf);
-										//очищаем буфер
+										//РѕС‡РёС‰Р°РµРј Р±СѓС„РµСЂ
 										memset(buf, 0, sizeof(buf));
-										//убираем все лишние символы
+										//СѓР±РёСЂР°РµРј РІСЃРµ Р»РёС€РЅРёРµ СЃРёРјРІРѕР»С‹
 										while((j+1) < len && (row_tbl[1][j+1] == '\r' || row_tbl[1][j+1] == '\n'))
 										{
 											j++;
 										}
 										k = 0;
 										m = 0;
-										//увеличиваем счётчик созданных полей выбора
+										//СѓРІРµР»РёС‡РёРІР°РµРј СЃС‡С‘С‚С‡РёРє СЃРѕР·РґР°РЅРЅС‹С… РїРѕР»РµР№ РІС‹Р±РѕСЂР°
 										l++;
 									}
 									break;
@@ -946,9 +946,9 @@ WHERE b.tab_name='%s'", main_table);
 		mysql_free_result(res_tbl);
 	}
 
-	if(fdynamic) //если в таблице присутствуют поля динамического выбора - подготовим их к выводу
+	if(fdynamic) //РµСЃР»Рё РІ С‚Р°Р±Р»РёС†Рµ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚ РїРѕР»СЏ РґРёРЅР°РјРёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР° - РїРѕРґРіРѕС‚РѕРІРёРј РёС… Рє РІС‹РІРѕРґСѓ
 	{
-		//получаем значения всех полей динамического выбора заданной таблицы
+		//РїРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёСЏ РІСЃРµС… РїРѕР»РµР№ РґРёРЅР°РјРёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР° Р·Р°РґР°РЅРЅРѕР№ С‚Р°Р±Р»РёС†С‹
 		sprintf_s(cmd, sizeof(cmd), "\
 SELECT a.col_name,c.tab_name,a.dynamic_col_id,a.dynamic_col_name,a.dynamic_tab_desc,a.dynamic_tab_id \
 FROM tab_dynamic a \
@@ -968,33 +968,33 @@ WHERE b.tab_name='%s'", main_table);
 			num_tbl = mysql_affected_rows(&mysql);
 		}
 
-		//формируем список
+		//С„РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРѕРє
 		if(num_tbl > 0)
 		{
 			while(num_tbl > 0)
 			{
-				//получаем следующую строку таблицы tab_dynamic
+				//РїРѕР»СѓС‡Р°РµРј СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹ tab_dynamic
 				row_tbl = mysql_fetch_row(res_tbl);
 
-				//если не указаны все необходимые данные в таблице tab_dynamic
+				//РµСЃР»Рё РЅРµ СѓРєР°Р·Р°РЅС‹ РІСЃРµ РЅРµРѕР±С…РѕРґРёРјС‹Рµ РґР°РЅРЅС‹Рµ РІ С‚Р°Р±Р»РёС†Рµ tab_dynamic
 				if(row_tbl[0] == NULL || row_tbl[1] == NULL || row_tbl[2] == NULL || row_tbl[3] == NULL || row_tbl[4] == NULL || row_tbl[5] == NULL)
 				{
 					num_tbl--;
 					continue;
 				}
 
-				//ищем среди столбцов выводимой таблицы все с типом 'Выборка'
+				//РёС‰РµРј СЃСЂРµРґРё СЃС‚РѕР»Р±С†РѕРІ РІС‹РІРѕРґРёРјРѕР№ С‚Р°Р±Р»РёС†С‹ РІСЃРµ СЃ С‚РёРїРѕРј 'Р’С‹Р±РѕСЂРєР°'
 				for(i = 0; i < cols_num; ++i)
 				{
 					if(strcmp(tab_col[i]->name, row_tbl[0]) == 0)
 					{
-						//делаем запрос к таблице с искомыми значениями, указанной в tab_dynamic
-						if(atoi(row_tbl[4]) == 1) //если указан флаг 'DESC'
+						//РґРµР»Р°РµРј Р·Р°РїСЂРѕСЃ Рє С‚Р°Р±Р»РёС†Рµ СЃ РёСЃРєРѕРјС‹РјРё Р·РЅР°С‡РµРЅРёСЏРјРё, СѓРєР°Р·Р°РЅРЅРѕР№ РІ tab_dynamic
+						if(atoi(row_tbl[4]) == 1) //РµСЃР»Рё СѓРєР°Р·Р°РЅ С„Р»Р°Рі 'DESC'
 						{
-							//помечаем этот столбец как список столбцов
+							//РїРѕРјРµС‡Р°РµРј СЌС‚РѕС‚ СЃС‚РѕР»Р±РµС† РєР°Рє СЃРїРёСЃРѕРє СЃС‚РѕР»Р±С†РѕРІ
 							tab_col[i]->desc = 1;
 
-							//находим порядковый номер столбца с таблицами, из которых формируется список
+							//РЅР°С…РѕРґРёРј РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚РѕР»Р±С†Р° СЃ С‚Р°Р±Р»РёС†Р°РјРё, РёР· РєРѕС‚РѕСЂС‹С… С„РѕСЂРјРёСЂСѓРµС‚СЃСЏ СЃРїРёСЃРѕРє
 							for(j = 0; j < cols_num; ++j)
 							{
 								if(strcmp(tab_col[j]->name, row_tbl[2]) == 0)
@@ -1004,8 +1004,8 @@ WHERE b.tab_name='%s'", main_table);
 								}
 							}
 
-							//делаем запрос к текущей таблице по заданному в tab_dynamic столбцу,
-							//откуда и узнаём имя требуемой таблицы с искомыми столбцами
+							//РґРµР»Р°РµРј Р·Р°РїСЂРѕСЃ Рє С‚РµРєСѓС‰РµР№ С‚Р°Р±Р»РёС†Рµ РїРѕ Р·Р°РґР°РЅРЅРѕРјСѓ РІ tab_dynamic СЃС‚РѕР»Р±С†Сѓ,
+							//РѕС‚РєСѓРґР° Рё СѓР·РЅР°С‘Рј РёРјСЏ С‚СЂРµР±СѓРµРјРѕР№ С‚Р°Р±Р»РёС†С‹ СЃ РёСЃРєРѕРјС‹РјРё СЃС‚РѕР»Р±С†Р°РјРё
 							sprintf_s(cmd, sizeof(cmd), "SELECT a.tab_name,a.id FROM all_tables a INNER JOIN %s b ON a.id=b.%s GROUP BY a.id", main_table, row_tbl[2]);
 
 							if(mysql_query(&mysql, cmd) != 0)
@@ -1020,16 +1020,16 @@ WHERE b.tab_name='%s'", main_table);
 								num_dsc = mysql_affected_rows(&mysql);
 							}
 
-							//преобразуем значение поля выбора в список (значение->строка_выбора)
+							//РїСЂРµРѕР±СЂР°Р·СѓРµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ РІС‹Р±РѕСЂР° РІ СЃРїРёСЃРѕРє (Р·РЅР°С‡РµРЅРёРµ->СЃС‚СЂРѕРєР°_РІС‹Р±РѕСЂР°)
 							if(num_dsc > 0)
 							{
-								//таблицы в заданном столбце присутствуют
-								//начинаем формирование выбора столбцов для каждой из них
+								//С‚Р°Р±Р»РёС†С‹ РІ Р·Р°РґР°РЅРЅРѕРј СЃС‚РѕР»Р±С†Рµ РїСЂРёСЃСѓС‚СЃС‚РІСѓСЋС‚
+								//РЅР°С‡РёРЅР°РµРј С„РѕСЂРјРёСЂРѕРІР°РЅРёРµ РІС‹Р±РѕСЂР° СЃС‚РѕР»Р±С†РѕРІ РґР»СЏ РєР°Р¶РґРѕР№ РёР· РЅРёС…
 
-								//в цикле формируем списки столбцов таблиц
+								//РІ С†РёРєР»Рµ С„РѕСЂРјРёСЂСѓРµРј СЃРїРёСЃРєРё СЃС‚РѕР»Р±С†РѕРІ С‚Р°Р±Р»РёС†
 								while(num_dsc > 0)
 								{
-									//получаем строку с именем таблицы
+									//РїРѕР»СѓС‡Р°РµРј СЃС‚СЂРѕРєСѓ СЃ РёРјРµРЅРµРј С‚Р°Р±Р»РёС†С‹
 									row_dsc = mysql_fetch_row(res_dsc);
 
 									if(row_dsc[0] == NULL || row_dsc[1] == NULL)
@@ -1052,7 +1052,7 @@ WHERE b.tab_name='%s'", main_table);
 										num_col = mysql_affected_rows(&mysql);
 									}
 
-									//преобразуем значение поля выбора в список (значение->строка_выбора)
+									//РїСЂРµРѕР±СЂР°Р·СѓРµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ РІС‹Р±РѕСЂР° РІ СЃРїРёСЃРѕРє (Р·РЅР°С‡РµРЅРёРµ->СЃС‚СЂРѕРєР°_РІС‹Р±РѕСЂР°)
 									if(num_col > 0)
 									{
 										if(tab_col[i]->dynamic == NULL)
@@ -1069,19 +1069,19 @@ WHERE b.tab_name='%s'", main_table);
 											tab_col[i]->dynamic->svnext = svlist;
 										}
 
-										//добавляем вариант 'NULL'
+										//РґРѕР±Р°РІР»СЏРµРј РІР°СЂРёР°РЅС‚ 'NULL'
 										l = tab_col[i]->dynamic->count;
 										tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
 										strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
 										tab_col[i]->dynamic->selects[l] = new char[strlen("NULL")+1];
 										strcpy_s(tab_col[i]->dynamic->selects[l], strlen("NULL")+1, "NULL");
-										//присваиваем текущему выбору несуществующий индекс таблицы
+										//РїСЂРёСЃРІР°РёРІР°РµРј С‚РµРєСѓС‰РµРјСѓ РІС‹Р±РѕСЂСѓ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРЅРґРµРєСЃ С‚Р°Р±Р»РёС†С‹
 										tab_col[i]->dynamic->tab_index = 0;
 										tab_col[i]->dynamic->count++;
 
 										while(num_col > 0)
 										{
-											//получаем следующую строку таблицы, указанной в tab_dynamic
+											//РїРѕР»СѓС‡Р°РµРј СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹, СѓРєР°Р·Р°РЅРЅРѕР№ РІ tab_dynamic
 											row_col = mysql_fetch_row(res_col);
 
 											if(row_col[0] == NULL)
@@ -1094,7 +1094,7 @@ WHERE b.tab_name='%s'", main_table);
 											strcpy_s(tab_col[i]->dynamic->values[l], strlen(row_col[0])+1, row_col[0]);
 											tab_col[i]->dynamic->selects[l] = new char[strlen(row_col[0])+1];
 											strcpy_s(tab_col[i]->dynamic->selects[l], strlen(row_col[0])+1, row_col[0]);
-											//присваиваем текущему выбору индекс таблицы, столбцы которой и формируют выборку
+											//РїСЂРёСЃРІР°РёРІР°РµРј С‚РµРєСѓС‰РµРјСѓ РІС‹Р±РѕСЂСѓ РёРЅРґРµРєСЃ С‚Р°Р±Р»РёС†С‹, СЃС‚РѕР»Р±С†С‹ РєРѕС‚РѕСЂРѕР№ Рё С„РѕСЂРјРёСЂСѓСЋС‚ РІС‹Р±РѕСЂРєСѓ
 											tab_col[i]->dynamic->tab_index = atoi(row_dsc[1]);
 
 											num_col--;
@@ -1108,9 +1108,9 @@ WHERE b.tab_name='%s'", main_table);
 							}
 							else
 							{
-								//этот выриант присутствует на всякий случай,
-								//а именно если таблицы в заданном столбце не существуют,
-								//и тогда происходит откат от индивидуального DESC для каждой таблицы
+								//СЌС‚РѕС‚ РІС‹СЂРёР°РЅС‚ РїСЂРёСЃСѓС‚СЃС‚РІСѓРµС‚ РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№,
+								//Р° РёРјРµРЅРЅРѕ РµСЃР»Рё С‚Р°Р±Р»РёС†С‹ РІ Р·Р°РґР°РЅРЅРѕРј СЃС‚РѕР»Р±С†Рµ РЅРµ СЃСѓС‰РµСЃС‚РІСѓСЋС‚,
+								//Рё С‚РѕРіРґР° РїСЂРѕРёСЃС…РѕРґРёС‚ РѕС‚РєР°С‚ РѕС‚ РёРЅРґРёРІРёРґСѓР°Р»СЊРЅРѕРіРѕ DESC РґР»СЏ РєР°Р¶РґРѕР№ С‚Р°Р±Р»РёС†С‹
 
 								tab_col[i]->desc = 0;
 								sprintf_s(cmd, sizeof(cmd), "SELECT col_name FROM tab_columns");
@@ -1127,7 +1127,7 @@ WHERE b.tab_name='%s'", main_table);
 									num_col = mysql_affected_rows(&mysql);
 								}
 
-								//преобразуем значение поля выбора в список (значение->строка_выбора)
+								//РїСЂРµРѕР±СЂР°Р·СѓРµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ РІС‹Р±РѕСЂР° РІ СЃРїРёСЃРѕРє (Р·РЅР°С‡РµРЅРёРµ->СЃС‚СЂРѕРєР°_РІС‹Р±РѕСЂР°)
 								if(num_col > 0)
 								{
 									if(tab_col[i]->dynamic == NULL)
@@ -1144,19 +1144,19 @@ WHERE b.tab_name='%s'", main_table);
 										tab_col[i]->dynamic->svnext = svlist;
 									}
 
-									//добавляем вариант 'NULL'
+									//РґРѕР±Р°РІР»СЏРµРј РІР°СЂРёР°РЅС‚ 'NULL'
 									l = tab_col[i]->dynamic->count;
 									tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
 									strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
 									tab_col[i]->dynamic->selects[l] = new char[strlen("NULL")+1];
 									strcpy_s(tab_col[i]->dynamic->selects[l], strlen("NULL")+1, "NULL");
-									//присваиваем текущему выбору несуществующий индекс таблицы
+									//РїСЂРёСЃРІР°РёРІР°РµРј С‚РµРєСѓС‰РµРјСѓ РІС‹Р±РѕСЂСѓ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРЅРґРµРєСЃ С‚Р°Р±Р»РёС†С‹
 									tab_col[i]->dynamic->tab_index = 0;
 									tab_col[i]->dynamic->count++;
 
 									while(num_col > 0)
 									{
-										//получаем следующую строку таблицы, указанной в tab_dynamic
+										//РїРѕР»СѓС‡Р°РµРј СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹, СѓРєР°Р·Р°РЅРЅРѕР№ РІ tab_dynamic
 										row_col = mysql_fetch_row(res_col);
 
 										if(row_col[0] == NULL)
@@ -1180,12 +1180,12 @@ WHERE b.tab_name='%s'", main_table);
 						}
 						else
 						{
-							//обычная связка двух таблиц
-							//по двум столбцам (с индексом и значением для выбора)
+							//РѕР±С‹С‡РЅР°СЏ СЃРІСЏР·РєР° РґРІСѓС… С‚Р°Р±Р»РёС†
+							//РїРѕ РґРІСѓРј СЃС‚РѕР»Р±С†Р°Рј (СЃ РёРЅРґРµРєСЃРѕРј Рё Р·РЅР°С‡РµРЅРёРµРј РґР»СЏ РІС‹Р±РѕСЂР°)
 
 							if(strcmp(row_tbl[2], row_tbl[3]) != 0)
 							{
-								//если ячейки с индексом и именем не совпадают
+								//РµСЃР»Рё СЏС‡РµР№РєРё СЃ РёРЅРґРµРєСЃРѕРј Рё РёРјРµРЅРµРј РЅРµ СЃРѕРІРїР°РґР°СЋС‚
 								sprintf_s(cmd, sizeof(cmd), "\
 SELECT %s,%s \
 FROM %s \
@@ -1193,7 +1193,7 @@ ORDER BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 							}
 							else
 							{
-								//если ячейки с индексом и именем совпадают
+								//РµСЃР»Рё СЏС‡РµР№РєРё СЃ РёРЅРґРµРєСЃРѕРј Рё РёРјРµРЅРµРј СЃРѕРІРїР°РґР°СЋС‚
 /*
 								sprintf_s(cmd, sizeof(cmd), "\
 SELECT %s,%s \
@@ -1220,7 +1220,7 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 								num_col = mysql_affected_rows(&mysql);
 							}
 
-							//преобразуем значение поля выбора в список (значение->строка_выбора)
+							//РїСЂРµРѕР±СЂР°Р·СѓРµРј Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ РІС‹Р±РѕСЂР° РІ СЃРїРёСЃРѕРє (Р·РЅР°С‡РµРЅРёРµ->СЃС‚СЂРѕРєР°_РІС‹Р±РѕСЂР°)
 							if(num_col > 0)
 							{
 								if(tab_col[i]->dynamic == NULL)
@@ -1237,19 +1237,19 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 									tab_col[i]->dynamic->svnext = svlist;
 								}
 
-								//добавляем вариант 'ПУСТО'
+								//РґРѕР±Р°РІР»СЏРµРј РІР°СЂРёР°РЅС‚ 'РџРЈРЎРўРћ'
 								l = tab_col[i]->dynamic->count;
 								tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
 								strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
 								tab_col[i]->dynamic->selects[l] = new char[strlen(" ")+1];
 								strcpy_s(tab_col[i]->dynamic->selects[l], strlen(" ")+1, " ");
-								//присваиваем текущему выбору несуществующий индекс таблицы
+								//РїСЂРёСЃРІР°РёРІР°РµРј С‚РµРєСѓС‰РµРјСѓ РІС‹Р±РѕСЂСѓ РЅРµСЃСѓС‰РµСЃС‚РІСѓСЋС‰РёР№ РёРЅРґРµРєСЃ С‚Р°Р±Р»РёС†С‹
 								tab_col[i]->dynamic->tab_index = 0;
 								tab_col[i]->dynamic->count++;
 
 								while(num_col > 0)
 								{
-									//получаем следующую строку таблицы, указанной в tab_dynamic
+									//РїРѕР»СѓС‡Р°РµРј СЃР»РµРґСѓСЋС‰СѓСЋ СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹, СѓРєР°Р·Р°РЅРЅРѕР№ РІ tab_dynamic
 									row_col = mysql_fetch_row(res_col);
 
 									if(row_col[0] == NULL || row_col[1] == NULL)
@@ -1270,7 +1270,7 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 
 							mysql_free_result(res_col);
 						}
-						break; //выход из цикла перебора всех столбцов текущей таблицы (в поисках текущего столбца)
+						break; //РІС‹С…РѕРґ РёР· С†РёРєР»Р° РїРµСЂРµР±РѕСЂР° РІСЃРµС… СЃС‚РѕР»Р±С†РѕРІ С‚РµРєСѓС‰РµР№ С‚Р°Р±Р»РёС†С‹ (РІ РїРѕРёСЃРєР°С… С‚РµРєСѓС‰РµРіРѕ СЃС‚РѕР»Р±С†Р°)
 					}
 				}
 				num_tbl--;
@@ -1280,7 +1280,7 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 		mysql_free_result(res_tbl);
 	}
 
-	//получаем html-заголовок таблицы main_table
+	//РїРѕР»СѓС‡Р°РµРј html-Р·Р°РіРѕР»РѕРІРѕРє С‚Р°Р±Р»РёС†С‹ main_table
 	sprintf_s(cmd, sizeof(cmd), "\
 SELECT a.html_head,a.html_end,a.html_tab_begin,a.html_tab_end,a.html_col_begin,a.html_col_end,a.html_buttons,a.http_head,a.default_insert,a.vertical \
 FROM tab_info a \
@@ -1304,10 +1304,10 @@ WHERE b.tab_name='%s'", main_table);
 	{
 		row_tbl = mysql_fetch_row(res_tbl);
 		memset(buf, 0, sizeof(buf));
-		//вставляем полученный заголовок в ответное сообщение
-		sprintf_s(buf, sizeof(buf), row_tbl[0], row_srv[1], main_table, row_srv[1], main_table, make_lt_gt(row_tbl[8])); //вставили заголовок страницы
+		//РІСЃС‚Р°РІР»СЏРµРј РїРѕР»СѓС‡РµРЅРЅС‹Р№ Р·Р°РіРѕР»РѕРІРѕРє РІ РѕС‚РІРµС‚РЅРѕРµ СЃРѕРѕР±С‰РµРЅРёРµ
+		sprintf_s(buf, sizeof(buf), row_tbl[0], row_srv[1], main_table, row_srv[1], main_table, make_lt_gt(row_tbl[8])); //РІСЃС‚Р°РІРёР»Рё Р·Р°РіРѕР»РѕРІРѕРє СЃС‚СЂР°РЅРёС†С‹
 
-		//вставляем кнопки системных таблиц
+		//РІСЃС‚Р°РІР»СЏРµРј РєРЅРѕРїРєРё СЃРёСЃС‚РµРјРЅС‹С… С‚Р°Р±Р»РёС†
 		strcpy_s(head, sizeof(head), "SELECT tab_button FROM all_tables WHERE tab_show=1 AND tab_system=1");
 	//		strcpy_s(head, sizeof(head), "select tab_button from all_tables");
 		if(mysql_query(&mysql, head) != 0)
@@ -1325,20 +1325,20 @@ WHERE b.tab_name='%s'", main_table);
 		}
 		if(num_col > 0)
 		{
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //С†РµРЅС‚СЂСѓРµРј
 		  while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		  {
 			if(row_col != NULL)
 			{
-				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //дополняем кнопки адресом сервера
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //добавляем кнопки открытия таблиц
+				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //РґРѕРїРѕР»РЅСЏРµРј РєРЅРѕРїРєРё Р°РґСЂРµСЃРѕРј СЃРµСЂРІРµСЂР°
+				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //РґРѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєРё РѕС‚РєСЂС‹С‚РёСЏ С‚Р°Р±Р»РёС†
 			}
 		  }
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //центруем
-	//		  strcat_s(buf, sizeof(buf)-strlen(buf), "<br>"); //отделяем пустой строкой
+		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //С†РµРЅС‚СЂСѓРµРј
+	//		  strcat_s(buf, sizeof(buf)-strlen(buf), "<br>"); //РѕС‚РґРµР»СЏРµРј РїСѓСЃС‚РѕР№ СЃС‚СЂРѕРєРѕР№
 		}
 
-		//вставляем кнопки несистемных таблиц
+		//РІСЃС‚Р°РІР»СЏРµРј РєРЅРѕРїРєРё РЅРµСЃРёСЃС‚РµРјРЅС‹С… С‚Р°Р±Р»РёС†
 		strcpy_s(head, sizeof(head), "SELECT tab_button FROM all_tables WHERE tab_show=1 AND tab_system=0");
 //		strcpy_s(head, sizeof(head), "select tab_button from all_tables");
 		if(mysql_query(&mysql, head) != 0)
@@ -1356,23 +1356,23 @@ WHERE b.tab_name='%s'", main_table);
 		}
 		if(num_col > 0)
 		{
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //С†РµРЅС‚СЂСѓРµРј
 		  while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		  {
 			if(row_col != NULL)
 			{
-				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //дополняем кнопки адресом сервера
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //добавляем кнопки открытия таблиц
+				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //РґРѕРїРѕР»РЅСЏРµРј РєРЅРѕРїРєРё Р°РґСЂРµСЃРѕРј СЃРµСЂРІРµСЂР°
+				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //РґРѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєРё РѕС‚РєСЂС‹С‚РёСЏ С‚Р°Р±Р»РёС†
 			}
 		  }
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //С†РµРЅС‚СЂСѓРµРј
 		}
 
-		strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[2]); //добавили заголовок таблицы
+		strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[2]); //РґРѕР±Р°РІРёР»Рё Р·Р°РіРѕР»РѕРІРѕРє С‚Р°Р±Р»РёС†С‹
 	}
 	else
 	{
-		//выход
+		//РІС‹С…РѕРґ
 		FREE_DATA_OF_COLUMNS;
 //  	    mysql_free_result(res);
 		mysql_free_result(res_srv);
@@ -1390,34 +1390,34 @@ WHERE b.tab_name='%s'", main_table);
 
 	}
 
-//--------------------------------------------------------------------ВЫВОД ЗНАЧЕНИЙ ТАБЛИЦЫ---------------------------------------------
+//--------------------------------------------------------------------Р’Р«Р’РћР” Р—РќРђР§Р•РќРР™ РўРђР‘Р›РР¦Р«---------------------------------------------
 
 	switch(atoi(row_tbl[9]))
 	{
-		case 0: //вывод горизонтальной таблицы
-			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //начало строки
-			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>№</h4></td>\n");
-			for(j = 1; j < cols_num; ++j) //j=1 - не показываем первый столбец (ключ)
+		case 0: //РІС‹РІРѕРґ РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅРѕР№ С‚Р°Р±Р»РёС†С‹
+			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё
+			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>в„–</h4></td>\n");
+			for(j = 1; j < cols_num; ++j) //j=1 - РЅРµ РїРѕРєР°Р·С‹РІР°РµРј РїРµСЂРІС‹Р№ СЃС‚РѕР»Р±РµС† (РєР»СЋС‡)
 			{
-			  //генерируем заголовок из кэша
+			  //РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РіРѕР»РѕРІРѕРє РёР· РєСЌС€Р°
 			  memset(cmd, 0, sizeof(cmd));
 			  sprintf_s(cmd, sizeof(cmd), tab_col[j]->html_hat, tab_col[j]->col_hat);
-			  //вставляем заголовок в таблицу
+			  //РІСЃС‚Р°РІР»СЏРµРј Р·Р°РіРѕР»РѕРІРѕРє РІ С‚Р°Р±Р»РёС†Сѓ
 			  strcat_s(buf, sizeof(buf)-strlen(buf), cmd);
 			}
 
-			if(fdelrow) //если задан флаг удаления столбцов
+			if(fdelrow) //РµСЃР»Рё Р·Р°РґР°РЅ С„Р»Р°Рі СѓРґР°Р»РµРЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ
 			{
 				sprintf_s(cmd, sizeof(cmd), "<td align=center>-</td>");
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //присоединяем к остальным столбцам
+				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //РїСЂРёСЃРѕРµРґРёРЅСЏРµРј Рє РѕСЃС‚Р°Р»СЊРЅС‹Рј СЃС‚РѕР»Р±С†Р°Рј
 			}
 
-			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //конец строки
+			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //РєРѕРЅРµС† СЃС‚СЂРѕРєРё
 
 
-			//здесь получаем данные из таблицы main_table
-			//генерируем запрос на основе полученного кэша (который определяет порядок столбцов)
-			//а также добавляем сортировку
+			//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РёР· С‚Р°Р±Р»РёС†С‹ main_table
+			//РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° РѕСЃРЅРѕРІРµ РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ РєСЌС€Р° (РєРѕС‚РѕСЂС‹Р№ РѕРїСЂРµРґРµР»СЏРµС‚ РїРѕСЂСЏРґРѕРє СЃС‚РѕР»Р±С†РѕРІ)
+			//Р° С‚Р°РєР¶Рµ РґРѕР±Р°РІР»СЏРµРј СЃРѕСЂС‚РёСЂРѕРІРєСѓ
 			memset(cmd, 0, sizeof(cmd));
 			memset(head, 0, sizeof(head));
 			strcpy_s(head, sizeof(head), " ORDER BY ");
@@ -1435,18 +1435,18 @@ WHERE b.tab_name='%s'", main_table);
 						break;
 					case 1:
 					case 2:
-						if(strlen(head) > 10)  //если больше чем длина строчки: " ORDER BY ", т.е. если перечисление уже было начато
+						if(strlen(head) > 10)  //РµСЃР»Рё Р±РѕР»СЊС€Рµ С‡РµРј РґР»РёРЅР° СЃС‚СЂРѕС‡РєРё: " ORDER BY ", С‚.Рµ. РµСЃР»Рё РїРµСЂРµС‡РёСЃР»РµРЅРёРµ СѓР¶Рµ Р±С‹Р»Рѕ РЅР°С‡Р°С‚Рѕ
 							strcat_s(head, sizeof(head)-strlen(head), ",");
 						strcat_s(head, sizeof(head)-strlen(head), tab_col[i]->name);
-						if(tab_col[i]->sort == 2) //если нужна сортировка в обратном порядке
+						if(tab_col[i]->sort == 2) //РµСЃР»Рё РЅСѓР¶РЅР° СЃРѕСЂС‚РёСЂРѕРІРєР° РІ РѕР±СЂР°С‚РЅРѕРј РїРѕСЂСЏРґРєРµ
 							strcat_s(head, sizeof(head)-strlen(head), " DESC");
 						break;
 				}
 			}
 			strcat(cmd, " FROM ");
-			strcat(cmd, main_table); //откуда
-			if(strlen(head) > 10) //если больше чем длина строчки: " ORDER BY ", т.е. если есть сортировка
-			  strcat(cmd, head); //сортировка
+			strcat(cmd, main_table); //РѕС‚РєСѓРґР°
+			if(strlen(head) > 10) //РµСЃР»Рё Р±РѕР»СЊС€Рµ С‡РµРј РґР»РёРЅР° СЃС‚СЂРѕС‡РєРё: " ORDER BY ", С‚.Рµ. РµСЃР»Рё РµСЃС‚СЊ СЃРѕСЂС‚РёСЂРѕРІРєР°
+			  strcat(cmd, head); //СЃРѕСЂС‚РёСЂРѕРІРєР°
 			if(mysql_query(&mysql, cmd) != 0)
 			{
 			  num = 0;
@@ -1460,13 +1460,13 @@ WHERE b.tab_name='%s'", main_table);
 			  num = mysql_affected_rows(&mysql);
 			}
 			  
-			i = 1; //номер строки (!)
+			i = 1; //РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё (!)
 			ffirst = true;
 			if(num > 0)
 			{
 			  while(num > 0)
 			  {
-				row = mysql_fetch_row(res); //получаем значения столбцов i-той строки
+				row = mysql_fetch_row(res); //РїРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ i-С‚РѕР№ СЃС‚СЂРѕРєРё
 				if(row == NULL)
 				{
 				  fprintf(stderr, "error mysql_fetch_row() : %s\n", mysql_error(&mysql));
@@ -1474,20 +1474,20 @@ WHERE b.tab_name='%s'", main_table);
 				}
 
 				memset(cmd, 0, sizeof(cmd));
-				//формируем строку таблицы
-				//типы: 0-нередактируемый
-				//      1-стандартная редактируемая строка
-				//			3-выбор
-				//			4-картинка
-				//			5-кнопка
-				//			7-да/нет
-				//			8-фиксатор
-				//			9-выборка
-				//			10-пароль
-				//			11-стиль
-				//      12-поле
-				//			13-замок
-				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], i); //начало строки и первый столбец (номер строки)
+				//С„РѕСЂРјРёСЂСѓРµРј СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹
+				//С‚РёРїС‹: 0-РЅРµСЂРµРґР°РєС‚РёСЂСѓРµРјС‹Р№
+				//      1-СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ СЂРµРґР°РєС‚РёСЂСѓРµРјР°СЏ СЃС‚СЂРѕРєР°
+				//			3-РІС‹Р±РѕСЂ
+				//			4-РєР°СЂС‚РёРЅРєР°
+				//			5-РєРЅРѕРїРєР°
+				//			7-РґР°/РЅРµС‚
+				//			8-С„РёРєСЃР°С‚РѕСЂ
+				//			9-РІС‹Р±РѕСЂРєР°
+				//			10-РїР°СЂРѕР»СЊ
+				//			11-СЃС‚РёР»СЊ
+				//      12-РїРѕР»Рµ
+				//			13-Р·Р°РјРѕРє
+				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], i); //РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё Рё РїРµСЂРІС‹Р№ СЃС‚РѕР»Р±РµС† (РЅРѕРјРµСЂ СЃС‚СЂРѕРєРё)
 
 				max = 0;
 				for(k = 0; k < cols_num; ++k)
@@ -1501,11 +1501,11 @@ WHERE b.tab_name='%s'", main_table);
 						max = len;
 				}
 
-				for(j = 1; j < cols_num; ++j) //j=1 - не показываем ключ
+				for(j = 1; j < cols_num; ++j) //j=1 - РЅРµ РїРѕРєР°Р·С‹РІР°РµРј РєР»СЋС‡
 				{
 					switch(tab_col[j]->type)
 					{
-						case 0: //нередактируемый
+						case 0: //РЅРµСЂРµРґР°РєС‚РёСЂСѓРµРјС‹Р№
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td>%s</td>\n", make_lt_gt(row[j]));
@@ -1515,11 +1515,11 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 							break;
-						case 11: //стиль
+						case 11: //СЃС‚РёР»СЊ
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td width=%d align=\"justify\">%s</td>",
-																					 tab_col[j]->col_size,//15, //ширина
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 make_style(row[1]));
 //								sprintf_s(head, sizeof(head), "<td align=\"justify\">%s</td>\n", make_style(row[j]));
 							}
@@ -1528,7 +1528,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 							break;
-						case 12: //поле
+						case 12: //РїРѕР»Рµ
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
@@ -1536,8 +1536,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[j]));
@@ -1549,14 +1549,14 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
 							}
 							break;
-						case 13: //замок
+						case 13: //Р·Р°РјРѕРє
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
@@ -1564,8 +1564,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[j]));
@@ -1577,14 +1577,14 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
 							}
 							break;
-						case 1: //стандартная редактируемая строка
+						case 1: //СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ СЂРµРґР°РєС‚РёСЂСѓРµРјР°СЏ СЃС‚СЂРѕРєР°
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), tab_col[j]->html_code, tab_col[j]->name,
@@ -1610,7 +1610,7 @@ WHERE b.tab_name='%s'", main_table);
 																					 "");
 							}
 							break;
-						case 2: //галочка
+						case 2: //РіР°Р»РѕС‡РєР°
 							if(row[j] != NULL)
 							{
 								char formatted_select[10240];
@@ -1624,8 +1624,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
 								}
@@ -1638,8 +1638,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
 								}
@@ -1649,7 +1649,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\">NULL</td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 3: //выбор
+						case 3: //РІС‹Р±РѕСЂ
 							if(row[j] != NULL && tab_col[j]->selects != NULL)
 							{
 								char formatted_select[10240];
@@ -1659,8 +1659,8 @@ WHERE b.tab_name='%s'", main_table);
 																				 atoi(row[0]),
 																				 tab_col[j]->name,
 																				 atoi(row[0]),
-																				 10, //высота
-																				 tab_col[j]->col_size,//15, //ширина
+																				 10, //РІС‹СЃРѕС‚Р°
+																				 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																				 tab_col[j]->name,
 																				 atoi(row[0]));
 								for(m = 0; m < tab_col[j]->selects->count; ++m)
@@ -1677,10 +1677,10 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 4: //заглушка на картинку
+						case 4: //Р·Р°РіР»СѓС€РєР° РЅР° РєР°СЂС‚РёРЅРєСѓ
 							if(row[j] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size,//ширина
+								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size,//С€РёСЂРёРЅР°
 																							make_lt_gt(row[j]));
 							}
 							else
@@ -1688,10 +1688,10 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 5: //как есть - становится частью страницы
+						case 5: //РєР°Рє РµСЃС‚СЊ - СЃС‚Р°РЅРѕРІРёС‚СЃСЏ С‡Р°СЃС‚СЊСЋ СЃС‚СЂР°РЅРёС†С‹
 							if(row[j] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td width=\"%d\" height=\"10\">%s</td>\n", tab_col[j]->col_size,//ширина
+								sprintf_s(head, sizeof(head), "<td width=\"%d\" height=\"10\">%s</td>\n", tab_col[j]->col_size,//С€РёСЂРёРЅР°
 																										  row[j]);
 							}
 							else
@@ -1699,37 +1699,37 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 7: //выбор да/нет
+						case 7: //РІС‹Р±РѕСЂ РґР°/РЅРµС‚
 							if(row[j] != NULL)
 							{
 								char formatted_select[10240];
 
 								if(atoi(row[j]) != 0)
 								{
-									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"%%s\" selected>Да</option><option value=\"0\">Нет</option></select></td>");
+									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"%%s\" selected>Р”Р°</option><option value=\"0\">РќРµС‚</option></select></td>");
 									sprintf_s(head, sizeof(head), formatted_select, tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 row[j]);
-//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"%s\" selected>Да</option><option value=\"0\">Нет</option></select></td>\n",tab_col[j]->col_size,row[j]);
+//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"%s\" selected>Р”Р°</option><option value=\"0\">РќРµС‚</option></select></td>\n",tab_col[j]->col_size,row[j]);
 								}
 								else
 								{
-									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"1\">Да</option><option value=\"0\" selected>Нет</option></select></td>");
+									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"1\">Р”Р°</option><option value=\"0\" selected>РќРµС‚</option></select></td>");
 									sprintf_s(head, sizeof(head), formatted_select, tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
-//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"1\">Да</option><option value=\"0\" selected>Нет</option></select></td>\n",tab_col[j]->col_size);
+//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"1\">Р”Р°</option><option value=\"0\" selected>РќРµС‚</option></select></td>\n",tab_col[j]->col_size);
 								}
 							}
 							else
@@ -1737,10 +1737,10 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 8: //фиксатор
+						case 8: //С„РёРєСЃР°С‚РѕСЂ
 							if(row[j] != NULL && strlen(row[j]) > 0)
 							{
-								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size*8,//ширина
+								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size*8,//С€РёСЂРёРЅР°
 																							make_style(row[j]));
 							}
 							else
@@ -1756,7 +1756,7 @@ WHERE b.tab_name='%s'", main_table);
 																					 "");
 							}
 							break;
-						case 9: //выборка
+						case 9: //РІС‹Р±РѕСЂРєР°
 							if(row[j] != NULL && tab_col[j]->dynamic != NULL)
 							{
 								char formatted_select[10240];
@@ -1783,8 +1783,8 @@ WHERE b.tab_name='%s'", main_table);
 																				 atoi(row[0]),
 																				 tab_col[j]->name,
 																				 atoi(row[0]),
-																				 10, //высота
-																				 tab_col[j]->col_size,//15, //ширина
+																				 10, //РІС‹СЃРѕС‚Р°
+																				 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																				 tab_col[j]->name,
 																				 atoi(row[0]));
 								for(m = 0; m < svlist->count; ++m)
@@ -1801,7 +1801,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 10: //пароль
+						case 10: //РїР°СЂРѕР»СЊ
 							if(row[j] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>",
@@ -1809,8 +1809,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 strlen(row[j])>0?"---XpeH---":"");
@@ -1821,8 +1821,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
@@ -1838,22 +1838,22 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 					}
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //РїСЂРёСЃРѕРµРґРёРЅСЏРµРј Рє РѕСЃС‚Р°Р»СЊРЅС‹Рј СЃС‚РѕР»Р±С†Р°Рј
 				}
 
-				if(fdelrow) //если задан флаг удаления столбцов
+				if(fdelrow) //РµСЃР»Рё Р·Р°РґР°РЅ С„Р»Р°Рі СѓРґР°Р»РµРЅРёСЏ СЃС‚РѕР»Р±С†РѕРІ
 				{
 					sprintf_s(head, sizeof(head), "<td align=center><input type=\"button\" form=\"mega_form\" onClick=\"myreqins('tab_id_%d')\" value=\"-\" /><input type='hidden' form='frm' id='tab_id_%d' name='make_some_request' value='DELETE FROM %s WHERE id=%d'></td>", atoi(row[0]), atoi(row[0]), main_table, atoi(row[0]));
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //РїСЂРёСЃРѕРµРґРёРЅСЏРµРј Рє РѕСЃС‚Р°Р»СЊРЅС‹Рј СЃС‚РѕР»Р±С†Р°Рј
 				}
 
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //конец строки
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //РєРѕРЅРµС† СЃС‚СЂРѕРєРё
 
 				if((strlen(cmd)+strlen(buf)) > sizeof(buf))
 				{
 					if(ffirst)
 					{
-						//отправляем первую порцию ("[заголовок]\r\n\r\n[размер (hex)]\r\n[buf]")
+						//РѕС‚РїСЂР°РІР»СЏРµРј РїРµСЂРІСѓСЋ РїРѕСЂС†РёСЋ ("[Р·Р°РіРѕР»РѕРІРѕРє]\r\n\r\n[СЂР°Р·РјРµСЂ (hex)]\r\n[buf]")
 						memset(head, 0, sizeof(head));
 						sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nServer: List/0.1.0\r\nReference: Win7\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\n");
 						strcat_s(head, sizeof(head)-strlen(head), "Connection: keep-alive\r\n\r\n");
@@ -1864,17 +1864,17 @@ WHERE b.tab_name='%s'", main_table);
 					}
 					else
 					{
-						//отправляем следующую порцию ("[размер (hex)]\r\n[buf]")
+						//РѕС‚РїСЂР°РІР»СЏРµРј СЃР»РµРґСѓСЋС‰СѓСЋ РїРѕСЂС†РёСЋ ("[СЂР°Р·РјРµСЂ (hex)]\r\n[buf]")
 						send_data = new char[strlen(buf)+16];
 						memset(send_data, 0, strlen(buf)+16);
 						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", strlen(buf), buf);
 					}
 
-					memset(buf, 0, sizeof(buf)); //освобождаем буфер
-					strcpy(buf, cmd); //вставляем новый результат в освободившийся буфер
+					memset(buf, 0, sizeof(buf)); //РѕСЃРІРѕР±РѕР¶РґР°РµРј Р±СѓС„РµСЂ
+					strcpy(buf, cmd); //РІСЃС‚Р°РІР»СЏРµРј РЅРѕРІС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РІ РѕСЃРІРѕР±РѕРґРёРІС€РёР№СЃСЏ Р±СѓС„РµСЂ
 
-					//требуется замена функции отправки с целью уменьшения (усреднения) минимального размера
-					//отправляемых за один раз данных (отправлять по частям, которые не зависят от размера буфера)
+					//С‚СЂРµР±СѓРµС‚СЃСЏ Р·Р°РјРµРЅР° С„СѓРЅРєС†РёРё РѕС‚РїСЂР°РІРєРё СЃ С†РµР»СЊСЋ СѓРјРµРЅСЊС€РµРЅРёСЏ (СѓСЃСЂРµРґРЅРµРЅРёСЏ) РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
+					//РѕС‚РїСЂР°РІР»СЏРµРјС‹С… Р·Р° РѕРґРёРЅ СЂР°Р· РґР°РЅРЅС‹С… (РѕС‚РїСЂР°РІР»СЏС‚СЊ РїРѕ С‡Р°СЃС‚СЏРј, РєРѕС‚РѕСЂС‹Рµ РЅРµ Р·Р°РІРёСЃСЏС‚ РѕС‚ СЂР°Р·РјРµСЂР° Р±СѓС„РµСЂР°)
 					size_to_send = strlen(send_data);
 					nbytes_sent = 0;
 					while(nbytes_sent < size_to_send)
@@ -1893,24 +1893,24 @@ WHERE b.tab_name='%s'", main_table);
 			  }
 			}
 			break;
-		case 1: //вывод вертикальной таблицы
-//удалить			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //начало строки
-//удалить			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>№</h4></td>\n");
+		case 1: //РІС‹РІРѕРґ РІРµСЂС‚РёРєР°Р»СЊРЅРѕР№ С‚Р°Р±Р»РёС†С‹
+//СѓРґР°Р»РёС‚СЊ			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё
+//СѓРґР°Р»РёС‚СЊ			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>в„–</h4></td>\n");
 
-			ffirst = true; //ещё ни одной отправки не было (для вставки заголовка)
-			index_row = 1; //номер текущей строки
-			for(j = 1; j < cols_num; ++j) //j=1 - не показываем первый столбец (ключ)
+			ffirst = true; //РµС‰С‘ РЅРё РѕРґРЅРѕР№ РѕС‚РїСЂР°РІРєРё РЅРµ Р±С‹Р»Рѕ (РґР»СЏ РІСЃС‚Р°РІРєРё Р·Р°РіРѕР»РѕРІРєР°)
+			index_row = 1; //РЅРѕРјРµСЂ С‚РµРєСѓС‰РµР№ СЃС‚СЂРѕРєРё
+			for(j = 1; j < cols_num; ++j) //j=1 - РЅРµ РїРѕРєР°Р·С‹РІР°РµРј РїРµСЂРІС‹Р№ СЃС‚РѕР»Р±РµС† (РєР»СЋС‡)
 			{
-//удалить			  strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //конец строки
-//				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], index_row); //начало строки
-				strcpy_s(cmd, sizeof(cmd), row_tbl[4]); //начало строки
+//СѓРґР°Р»РёС‚СЊ			  strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //РєРѕРЅРµС† СЃС‚СЂРѕРєРё
+//				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], index_row); //РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё
+				strcpy_s(cmd, sizeof(cmd), row_tbl[4]); //РЅР°С‡Р°Р»Рѕ СЃС‚СЂРѕРєРё
 
-				//здесь получаем данные из таблицы main_table
-				//генерируем запрос на основе полученного кэша (который определяет порядок столбцов)
-				//а также добавляем сортировку
+				//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РґР°РЅРЅС‹Рµ РёР· С‚Р°Р±Р»РёС†С‹ main_table
+				//РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° РѕСЃРЅРѕРІРµ РїРѕР»СѓС‡РµРЅРЅРѕРіРѕ РєСЌС€Р° (РєРѕС‚РѕСЂС‹Р№ РѕРїСЂРµРґРµР»СЏРµС‚ РїРѕСЂСЏРґРѕРє СЃС‚РѕР»Р±С†РѕРІ)
+				//Р° С‚Р°РєР¶Рµ РґРѕР±Р°РІР»СЏРµРј СЃРѕСЂС‚РёСЂРѕРІРєСѓ
 
 				memset(head, 0, sizeof(head));
-				//получаем все строчки текущего столбца
+				//РїРѕР»СѓС‡Р°РµРј РІСЃРµ СЃС‚СЂРѕС‡РєРё С‚РµРєСѓС‰РµРіРѕ СЃС‚РѕР»Р±С†Р°
 				sprintf_s(head, sizeof(head), "SELECT id,%s FROM %s", tab_col[index_row]->name, main_table);
 				for(i = 0; i < cols_num; ++i)
 				{
@@ -1940,39 +1940,39 @@ WHERE b.tab_name='%s'", main_table);
 				  num = mysql_affected_rows(&mysql);
 				}
 				  
-				//вывод имени столбца
+				//РІС‹РІРѕРґ РёРјРµРЅРё СЃС‚РѕР»Р±С†Р°
 				memset(head, 0, sizeof(head));
-				sprintf_s(head, sizeof(head), tab_col[index_row]->html_hat, tab_col[index_row]->col_hat); //генерируем заголовок из кэша
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //вставляем заголовок в таблицу
+				sprintf_s(head, sizeof(head), tab_col[index_row]->html_hat, tab_col[index_row]->col_hat); //РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РіРѕР»РѕРІРѕРє РёР· РєСЌС€Р°
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //РІСЃС‚Р°РІР»СЏРµРј Р·Р°РіРѕР»РѕРІРѕРє РІ С‚Р°Р±Р»РёС†Сѓ
 
 				if(num > 0)
 				{
 				  while(num > 0)
 				  {
-					row = mysql_fetch_row(res); //получаем значение index_row-той строки j-того столбца
+					row = mysql_fetch_row(res); //РїРѕР»СѓС‡Р°РµРј Р·РЅР°С‡РµРЅРёРµ index_row-С‚РѕР№ СЃС‚СЂРѕРєРё j-С‚РѕРіРѕ СЃС‚РѕР»Р±С†Р°
 					if(row == NULL)
 					{
 					  fprintf(stderr, "error mysql_fetch_row() : %s\n", mysql_error(&mysql));
 					  break;
 					}
 
-					//формируем строку таблицы
-					//типы: 0-нередактируемый
-					//		1-стандартная редактируемая строка
-					//		2-галочка
-					//		3-выбор
-					//		4-картинка
-					//    5-как есть (часть странички, например кнопка)
-					//		7-да/нет
-					//		8-фиксатор
-					//		9-выборка
-					//		10-пароль
-					//    11-стиль
-					//    12-поле
-					//		13-замок
+					//С„РѕСЂРјРёСЂСѓРµРј СЃС‚СЂРѕРєСѓ С‚Р°Р±Р»РёС†С‹
+					//С‚РёРїС‹: 0-РЅРµСЂРµРґР°РєС‚РёСЂСѓРµРјС‹Р№
+					//		1-СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ СЂРµРґР°РєС‚РёСЂСѓРµРјР°СЏ СЃС‚СЂРѕРєР°
+					//		2-РіР°Р»РѕС‡РєР°
+					//		3-РІС‹Р±РѕСЂ
+					//		4-РєР°СЂС‚РёРЅРєР°
+					//    5-РєР°Рє РµСЃС‚СЊ (С‡Р°СЃС‚СЊ СЃС‚СЂР°РЅРёС‡РєРё, РЅР°РїСЂРёРјРµСЂ РєРЅРѕРїРєР°)
+					//		7-РґР°/РЅРµС‚
+					//		8-С„РёРєСЃР°С‚РѕСЂ
+					//		9-РІС‹Р±РѕСЂРєР°
+					//		10-РїР°СЂРѕР»СЊ
+					//    11-СЃС‚РёР»СЊ
+					//    12-РїРѕР»Рµ
+					//		13-Р·Р°РјРѕРє
 					switch(tab_col[j]->type)
 					{
-						case 0: //нередактируемый
+						case 0: //РЅРµСЂРµРґР°РєС‚РёСЂСѓРµРјС‹Р№
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td>%s</td>\n", make_lt_gt(row[1]));
@@ -1982,11 +1982,11 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 							break;
-						case 11: //стиль
+						case 11: //СЃС‚РёР»СЊ
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td width=%d align=\"justify\">%s</td>",
-																					 tab_col[j]->col_size,//15, //ширина
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 make_style(row[1]));
 //								sprintf_s(head, sizeof(head), "<td align=\"justify\">%s</td>\n", make_style(row[1]));
 							}
@@ -1995,7 +1995,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 							break;
-						case 12: //поле
+						case 12: //РїРѕР»Рµ
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d width=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
@@ -2003,8 +2003,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[1]));
@@ -2016,14 +2016,14 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
 							}
 							break;
-						case 13: //замок
+						case 13: //Р·Р°РјРѕРє
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d width=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
@@ -2031,8 +2031,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[1]));
@@ -2044,22 +2044,22 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
 							}
 							break;
-						case 1: //стандартная редактируемая строка
+						case 1: //СЃС‚Р°РЅРґР°СЂС‚РЅР°СЏ СЂРµРґР°РєС‚РёСЂСѓРµРјР°СЏ СЃС‚СЂРѕРєР°
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), tab_col[j]->html_code, tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
-																					 (tab_col[j]->col_size > 50) ? tab_col[j]->col_size/5 : tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 (tab_col[j]->col_size > 50) ? tab_col[j]->col_size/5 : tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[1]));
@@ -2070,14 +2070,14 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
 							}
 							break;
-						case 2: //галочка
+						case 2: //РіР°Р»РѕС‡РєР°
 							if(row[1] != NULL)
 							{
 								char formatted_select[10240];
@@ -2091,8 +2091,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
 								}
@@ -2105,8 +2105,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
 								}
@@ -2116,7 +2116,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\">NULL</td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 3: //выбор
+						case 3: //РІС‹Р±РѕСЂ
 							if(row[1] != NULL && tab_col[j]->selects != NULL)
 							{
 								char formatted_select[10240];
@@ -2126,8 +2126,8 @@ WHERE b.tab_name='%s'", main_table);
 																				 atoi(row[0]),
 																				 tab_col[j]->name,
 																				 atoi(row[0]),
-																				 10, //высота
-																				 tab_col[j]->col_size,//15, //ширина
+																				 10, //РІС‹СЃРѕС‚Р°
+																				 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																				 tab_col[j]->name,
 																				 atoi(row[0]));
 								for(m = 0; m < tab_col[j]->selects->count; ++m)
@@ -2144,10 +2144,10 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 4: //тут пока заглушка..
+						case 4: //С‚СѓС‚ РїРѕРєР° Р·Р°РіР»СѓС€РєР°..
 							if(row[1] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size,//ширина
+								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size,//С€РёСЂРёРЅР°
 																							make_lt_gt(row[1]));
 							}
 							else
@@ -2155,7 +2155,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 5: //как есть (встраивается в код страницы)
+						case 5: //РєР°Рє РµСЃС‚СЊ (РІСЃС‚СЂР°РёРІР°РµС‚СЃСЏ РІ РєРѕРґ СЃС‚СЂР°РЅРёС†С‹)
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size, row[1]);
@@ -2165,37 +2165,37 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 7: //выбор да/нет
+						case 7: //РІС‹Р±РѕСЂ РґР°/РЅРµС‚
 							if(row[1] != NULL)
 							{
 								char formatted_select[10240];
 
 								if(atoi(row[1]) != 0)
 								{
-									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"%%s\" selected>Да</option><option value=\"0\">Нет</option></select></td>");
+									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"%%s\" selected>Р”Р°</option><option value=\"0\">РќРµС‚</option></select></td>");
 									sprintf_s(head, sizeof(head), formatted_select, tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 row[1]);
-//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"%s\" selected>Да</option><option value=\"0\">Нет</option></select></td>\n",tab_col[j]->col_size,row[1]);
+//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"%s\" selected>Р”Р°</option><option value=\"0\">РќРµС‚</option></select></td>\n",tab_col[j]->col_size,row[1]);
 								}
 								else
 								{
-									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"1\">Да</option><option value=\"0\" selected>Нет</option></select></td>");
+									sprintf_s(formatted_select, sizeof(formatted_select), "<td><select form=\"frm\" id=\"%%s_%%d\" name=\"%%s[%%d]\" rows=%%d cols=%%d onChange=\"myreq('%%s_%%d')\"><option value=\"1\">Р”Р°</option><option value=\"0\" selected>РќРµС‚</option></select></td>");
 									sprintf_s(head, sizeof(head), formatted_select, tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 10, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 10, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]));
-//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"1\">Да</option><option value=\"0\" selected>Нет</option></select></td>\n",tab_col[j]->col_size);
+//									sprintf_s(head, sizeof(head), "<td width=\"%d\"><select><option value=\"1\">Р”Р°</option><option value=\"0\" selected>РќРµС‚</option></select></td>\n",tab_col[j]->col_size);
 								}
 							}
 							else
@@ -2203,10 +2203,10 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 8: //фиксатор
+						case 8: //С„РёРєСЃР°С‚РѕСЂ
 							if(row[1] != NULL && strlen(row[1]) > 0)
 							{
-								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size*8,//ширина
+								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size*8,//С€РёСЂРёРЅР°
 																							make_style(row[1]));
 							}
 							else
@@ -2222,7 +2222,7 @@ WHERE b.tab_name='%s'", main_table);
 																					 "");
 							}
 							break;
-						case 9: //выборка
+						case 9: //РІС‹Р±РѕСЂРєР°
 							if(row[1] != NULL && tab_col[j]->dynamic != NULL)
 							{
 								char formatted_select[10240];
@@ -2248,8 +2248,8 @@ WHERE b.tab_name='%s'", main_table);
 																				 atoi(row[0]),
 																				 tab_col[j]->name,
 																				 atoi(row[0]),
-																				 10, //высота
-																				 tab_col[j]->col_size,//15, //ширина
+																				 10, //РІС‹СЃРѕС‚Р°
+																				 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																				 tab_col[j]->name,
 																				 atoi(row[0]));
 								for(m = 0; m < svlist->count; ++m)
@@ -2266,15 +2266,15 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 10: //пароль
+						case 10: //РїР°СЂРѕР»СЊ
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>", tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
-																					 tab_col[j]->col_size,//15, //ширина
+																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //РІС‹СЃРѕС‚Р°
+																					 tab_col[j]->col_size,//15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 strlen(row[1])>0?"---XpeH---":"");
@@ -2285,8 +2285,8 @@ WHERE b.tab_name='%s'", main_table);
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 3, //высота
-																					 15, //ширина
+																					 3, //РІС‹СЃРѕС‚Р°
+																					 15, //С€РёСЂРёРЅР°
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
@@ -2302,22 +2302,22 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 					}
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //РїСЂРёСЃРѕРµРґРёРЅСЏРµРј Рє РѕСЃС‚Р°Р»СЊРЅС‹Рј СЃС‚РѕР»Р±С†Р°Рј
 					num--;
 				  }
 				}
 				else
 				{
-//					break; //не выводить заголовки пустых таблиц
+//					break; //РЅРµ РІС‹РІРѕРґРёС‚СЊ Р·Р°РіРѕР»РѕРІРєРё РїСѓСЃС‚С‹С… С‚Р°Р±Р»РёС†
 				}
 
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //конец строки
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //РєРѕРЅРµС† СЃС‚СЂРѕРєРё
 
 				if((strlen(cmd)+strlen(buf)) > sizeof(buf))
 				{
 					if(ffirst)
 					{
-						//отправляем первую порцию ("[заголовок]\r\n\r\n[размер (hex)]\r\n[buf]")
+						//РѕС‚РїСЂР°РІР»СЏРµРј РїРµСЂРІСѓСЋ РїРѕСЂС†РёСЋ ("[Р·Р°РіРѕР»РѕРІРѕРє]\r\n\r\n[СЂР°Р·РјРµСЂ (hex)]\r\n[buf]")
 						memset(head, 0, sizeof(head));
 						sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nServer: List/0.1.0\r\nReference: Win7\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\n");
 						strcat_s(head, sizeof(head)-strlen(head), "Connection: keep-alive\r\n\r\n");
@@ -2328,17 +2328,17 @@ WHERE b.tab_name='%s'", main_table);
 					}
 					else
 					{
-						//отправляем следующую порцию ("[размер (hex)]\r\n[buf]")
+						//РѕС‚РїСЂР°РІР»СЏРµРј СЃР»РµРґСѓСЋС‰СѓСЋ РїРѕСЂС†РёСЋ ("[СЂР°Р·РјРµСЂ (hex)]\r\n[buf]")
 						send_data = new char[strlen(buf)+16];
 						memset(send_data, 0, strlen(buf)+16);
 						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", strlen(buf), buf);
 					}
 
-					memset(buf, 0, sizeof(buf)); //освобождаем буфер
-					strcpy(buf, cmd); //вставляем новый результат в освободившийся буфер
+					memset(buf, 0, sizeof(buf)); //РѕСЃРІРѕР±РѕР¶РґР°РµРј Р±СѓС„РµСЂ
+					strcpy(buf, cmd); //РІСЃС‚Р°РІР»СЏРµРј РЅРѕРІС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚ РІ РѕСЃРІРѕР±РѕРґРёРІС€РёР№СЃСЏ Р±СѓС„РµСЂ
 
-					//требуется замена функции отправки с целью уменьшения (усреднения) минимального размера
-					//отправляемых за один раз данных (отправлять по частям, которые не зависят от размера буфера)
+					//С‚СЂРµР±СѓРµС‚СЃСЏ Р·Р°РјРµРЅР° С„СѓРЅРєС†РёРё РѕС‚РїСЂР°РІРєРё СЃ С†РµР»СЊСЋ СѓРјРµРЅСЊС€РµРЅРёСЏ (СѓСЃСЂРµРґРЅРµРЅРёСЏ) РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ СЂР°Р·РјРµСЂР°
+					//РѕС‚РїСЂР°РІР»СЏРµРјС‹С… Р·Р° РѕРґРёРЅ СЂР°Р· РґР°РЅРЅС‹С… (РѕС‚РїСЂР°РІР»СЏС‚СЊ РїРѕ С‡Р°СЃС‚СЏРј, РєРѕС‚РѕСЂС‹Рµ РЅРµ Р·Р°РІРёСЃСЏС‚ РѕС‚ СЂР°Р·РјРµСЂР° Р±СѓС„РµСЂР°)
 					size_to_send = strlen(send_data);
 					nbytes_sent = 0;
 					while(nbytes_sent < size_to_send)
@@ -2357,11 +2357,11 @@ WHERE b.tab_name='%s'", main_table);
 			break;
 	}
 
-//--------------------------------------------------------------------ЗАВЕРШЕНИЕ ТАБЛИЦЫ---------------------------------------------
+//--------------------------------------------------------------------Р—РђР’Р•Р РЁР•РќРР• РўРђР‘Р›РР¦Р«---------------------------------------------
 
-	strcpy_s(cmd, sizeof(cmd), row_tbl[3]); //конец таблицы
-	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[6]); //кнопки
-	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[1]); //конец файла
+	strcpy_s(cmd, sizeof(cmd), row_tbl[3]); //РєРѕРЅРµС† С‚Р°Р±Р»РёС†С‹
+	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[6]); //РєРЅРѕРїРєРё
+	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[1]); //РєРѕРЅРµС† С„Р°Р№Р»Р°
 
 	if(ffirst)
 	{
@@ -2376,7 +2376,7 @@ WHERE b.tab_name='%s'", main_table);
 	send_data = new char[strlen(buf)+strlen(cmd)+strlen(head)+16];
 	memset(send_data, 0, strlen(buf)+strlen(cmd)+strlen(head)+16);
 	sprintf_s(send_data, strlen(buf)+15+strlen(cmd)+strlen(head), "%s%x\r\n%s%s\r\n0\r\n\r\n", head, strlen(buf)+strlen(cmd), buf, cmd);
-	//	fprintf(stderr, "%s\n", send_data); //отладка
+	//	fprintf(stderr, "%s\n", send_data); //РѕС‚Р»Р°РґРєР°
 	size_to_send = strlen(send_data);
 	nbytes_sent = 0;
 	while(nbytes_sent < size_to_send)
@@ -2411,7 +2411,7 @@ void mysql_error_thread_exit(MYSQL * const mysql, SOCKET * const ns)
 
 	sprintf_s(cmd, sizeof(cmd), "error mysql_query() : %s", mysql_error(mysql));
 	fprintf(stderr, "%s\n", cmd);
-	//выход (либо сообщение об ошибке)
+	//РІС‹С…РѕРґ (Р»РёР±Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ)
 	sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", strlen(cmd), cmd);
 	send(*ns, head, strlen(head), 0);
 	Sleep(500);
@@ -2432,7 +2432,7 @@ void error_thread_exit(MYSQL * const mysql, SOCKET * const ns, char const * cons
 	char head[MAX_HEAD_SIZE];
 
 	fprintf(stderr, "%s\n", err_text);
-	//выход (либо сообщение об ошибке)
+	//РІС‹С…РѕРґ (Р»РёР±Рѕ СЃРѕРѕР±С‰РµРЅРёРµ РѕР± РѕС€РёР±РєРµ)
 	sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", strlen(err_text), err_text);
 	send(*ns, head, strlen(head), 0);
 	Sleep(500);
@@ -2487,15 +2487,15 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 		pindex = strstr(pindex, name);
 		if(pindex == NULL)
 			return 0;
-		if(pindex[strlen(name)] != '=') //если после имени не стоит знак '='
+		if(pindex[strlen(name)] != '=') //РµСЃР»Рё РїРѕСЃР»Рµ РёРјРµРЅРё РЅРµ СЃС‚РѕРёС‚ Р·РЅР°Рє '='
 		{
 			pindex++;
 			continue;
 		}
-		else //иначе инициализируем value и убираем эту строчку
+		else //РёРЅР°С‡Рµ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј value Рё СѓР±РёСЂР°РµРј СЌС‚Сѓ СЃС‚СЂРѕС‡РєСѓ
 		{
 			len = strlen(pindex);
-			for(i = 0; i < len; ++i) //находим конец строки
+			for(i = 0; i < len; ++i) //РЅР°С…РѕРґРёРј РєРѕРЅРµС† СЃС‚СЂРѕРєРё
 			{
 				if(pindex[i] == '+')
 				{
@@ -2511,13 +2511,13 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 					break;
 			}
 
-			main_len = strlen(pindex); //запомним длину строчки 'name'
+			main_len = strlen(pindex); //Р·Р°РїРѕРјРЅРёРј РґР»РёРЅСѓ СЃС‚СЂРѕС‡РєРё 'name'
 			index = i;
-			pindex_start = pindex + strlen(name) + 1; //устанавливаем позицию начала значения
-			buf = new char[index*2+1]; //этого должно хватить с лихвой
+			pindex_start = pindex + strlen(name) + 1; //СѓСЃС‚Р°РЅР°РІР»РёРІР°РµРј РїРѕР·РёС†РёСЋ РЅР°С‡Р°Р»Р° Р·РЅР°С‡РµРЅРёСЏ
+			buf = new char[index*2+1]; //СЌС‚РѕРіРѕ РґРѕР»Р¶РЅРѕ С…РІР°С‚РёС‚СЊ СЃ Р»РёС…РІРѕР№
 			memset(buf, 0, index*2+1);
 
-			//убираем %XX
+			//СѓР±РёСЂР°РµРј %XX
 			for(i = 0, j = 0; i < index; ++i, ++j)
 			{
 				if(pindex_start[i] != '%')
@@ -2546,13 +2546,13 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 			strcpy_s(value, MAX_HEAD_SIZE, buf);
 			fprintf(stderr, "buf: %s\n", buf);
 			delete [] buf;
-			for(i = 0;;++i) //затираем эту запись
+			for(i = 0;;++i) //Р·Р°С‚РёСЂР°РµРј СЌС‚Сѓ Р·Р°РїРёСЃСЊ
 			{
 				pindex[i] = pindex[main_len+i+1];
 				if(pindex[i] == '\0')
 					break;
 			}
-//			strcpy(pindex, &pindex[main_len+1]); //затираем эту запись
+//			strcpy(pindex, &pindex[main_len+1]); //Р·Р°С‚РёСЂР°РµРј СЌС‚Сѓ Р·Р°РїРёСЃСЊ
 			if(strlen(value) > 0)
 				len = 1;
 			else
@@ -2595,7 +2595,7 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 	len = 0;
 
 	j = strlen(ptr);
-    //находим стык переданных значений
+    //РЅР°С…РѕРґРёРј СЃС‚С‹Рє РїРµСЂРµРґР°РЅРЅС‹С… Р·РЅР°С‡РµРЅРёР№
 	for(i = 0; i < j; ++i)
 	{
 		if(ptr[i] == '+')
@@ -2606,15 +2606,15 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 
 		if(ptr[i] == '&')
 		{
-		    len = strlen(ptr+i); //длина остатка
-			id_value_data->index = i+1; //сдвигаем ptr
+		    len = strlen(ptr+i); //РґР»РёРЅР° РѕСЃС‚Р°С‚РєР°
+			id_value_data->index = i+1; //СЃРґРІРёРіР°РµРј ptr
 			break;
 		}
 	}
-	index = i; //запоминаем позицию
-	buf = new char[index*2+1]; //этого должно хватить с лихвой
+	index = i; //Р·Р°РїРѕРјРёРЅР°РµРј РїРѕР·РёС†РёСЋ
+	buf = new char[index*2+1]; //СЌС‚РѕРіРѕ РґРѕР»Р¶РЅРѕ С…РІР°С‚РёС‚СЊ СЃ Р»РёС…РІРѕР№
 	memset(buf, 0, index*2+1);
-	//убираем %XX
+	//СѓР±РёСЂР°РµРј %XX
   for(i = 0, j = 0; i < index; ++i, ++j)
 	{
 		if(ptr[i] != '%')
@@ -2651,9 +2651,9 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 	pindex[0] = '\0';
 	id_value_data->name = new char[strlen(buf)+1];
 	memset(id_value_data->name, 0, strlen(buf)+1);
-	strcpy(id_value_data->name, buf); //копируем имя столбца
-	id_value_data->id = atoi(pindex+1); //определяем id записи
-	pindex = strstr(pindex+1, "="); //находим начало значения
+	strcpy(id_value_data->name, buf); //РєРѕРїРёСЂСѓРµРј РёРјСЏ СЃС‚РѕР»Р±С†Р°
+	id_value_data->id = atoi(pindex+1); //РѕРїСЂРµРґРµР»СЏРµРј id Р·Р°РїРёСЃРё
+	pindex = strstr(pindex+1, "="); //РЅР°С…РѕРґРёРј РЅР°С‡Р°Р»Рѕ Р·РЅР°С‡РµРЅРёСЏ
 	if(pindex == NULL)
 	{
 		delete [] id_value_data->name;
@@ -2683,7 +2683,7 @@ void run_commands(char * const cmd_list, MYSQL * const pmysql, SOCKET * const ns
 	ptr = strtok(cmd_list, ",");
 	while(ptr != NULL)
 	{
-		if(strncmp(ptr, "create_new_table", strlen(ptr)) == 0) //если присутствует команда 'создать новую таблицу'
+		if(strncmp(ptr, "create_new_table", strlen(ptr)) == 0) //РµСЃР»Рё РїСЂРёСЃСѓС‚СЃС‚РІСѓРµС‚ РєРѕРјР°РЅРґР° 'СЃРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ С‚Р°Р±Р»РёС†Сѓ'
 		{
 			create_new_table(pmysql, ns);
 		}
@@ -3020,12 +3020,12 @@ void create_new_table(MYSQL * const pmysql, SOCKET * const ns)
 	all_tables_values = new char[MAX_BUFF_SIZE];
 	memset(columns_sql_buff, 0, sizeof(columns_sql_buff));
 	memset(value_of_select, 0, sizeof(value_of_select));
-	//инициализируем в этом месте для макроса FREE_ALL_VARS
+	//РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РІ СЌС‚РѕРј РјРµСЃС‚Рµ РґР»СЏ РјР°РєСЂРѕСЃР° FREE_ALL_VARS
 	column_index = 0;
 	value_of_select_index = 0;
 
 	memset(cmd, 0, MAX_BUFF_SIZE);
-	//здесь получаем описание столбцов таблицы
+	//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "SELECT \
 id,\
 new_tab_name,\
@@ -3065,7 +3065,7 @@ new_table_type\
 	}
 
 	memset(cmd, 0, MAX_BUFF_SIZE);
-	//здесь получаем описание самой таблицы
+	//Р·РґРµСЃСЊ РїРѕР»СѓС‡Р°РµРј РѕРїРёСЃР°РЅРёРµ СЃР°РјРѕР№ С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "SELECT \
 id,\
 new_col_name,\
@@ -3099,13 +3099,13 @@ new_col_select_value\
 		return;
 	}
 
-//1. Генерация запросов:
-//	а) на добавление самой таблицы (две строки: для table_name(...) и для values(...));
-//	б) на добавление в таблицу tab_info (две строки: для insert into tab_info(...) и values(...));
-//	в) на добавление в таблицу tab_columns (две строки: для insert into tab_columns(...) и values(...)).
-//2. Добавление самой таблицы.
-//3. Добавление в таблицу all_tables.
-//4. Добавление в таблицы tab_info и tab_columns.
+//1. Р“РµРЅРµСЂР°С†РёСЏ Р·Р°РїСЂРѕСЃРѕРІ:
+//	Р°) РЅР° РґРѕР±Р°РІР»РµРЅРёРµ СЃР°РјРѕР№ С‚Р°Р±Р»РёС†С‹ (РґРІРµ СЃС‚СЂРѕРєРё: РґР»СЏ table_name(...) Рё РґР»СЏ values(...));
+//	Р±) РЅР° РґРѕР±Р°РІР»РµРЅРёРµ РІ С‚Р°Р±Р»РёС†Сѓ tab_info (РґРІРµ СЃС‚СЂРѕРєРё: РґР»СЏ insert into tab_info(...) Рё values(...));
+//	РІ) РЅР° РґРѕР±Р°РІР»РµРЅРёРµ РІ С‚Р°Р±Р»РёС†Сѓ tab_columns (РґРІРµ СЃС‚СЂРѕРєРё: РґР»СЏ insert into tab_columns(...) Рё values(...)).
+//2. Р”РѕР±Р°РІР»РµРЅРёРµ СЃР°РјРѕР№ С‚Р°Р±Р»РёС†С‹.
+//3. Р”РѕР±Р°РІР»РµРЅРёРµ РІ С‚Р°Р±Р»РёС†Сѓ all_tables.
+//4. Р”РѕР±Р°РІР»РµРЅРёРµ РІ С‚Р°Р±Р»РёС†С‹ tab_info Рё tab_columns.
 
 //info:
 // 0	id
@@ -3139,7 +3139,7 @@ new_col_select_value\
 	column_index_all_tables_name = 0;
 	column_index_all_tables_values = 0;
 
-	//формируем запрос на создание описания таблицы
+	//С„РѕСЂРјРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° СЃРѕР·РґР°РЅРёРµ РѕРїРёСЃР°РЅРёСЏ С‚Р°Р±Р»РёС†С‹
 	for(i = 0; i < 15; ++i)
 	{
 		if(row_inf == NULL)
@@ -3151,20 +3151,20 @@ new_col_select_value\
 		}
 		switch(i)
 		{
-			case 1: //char системное имя таблицы
+			case 1: //char СЃРёСЃС‚РµРјРЅРѕРµ РёРјСЏ С‚Р°Р±Р»РёС†С‹
 				memset(table_name, 0, sizeof(table_name));
 				if(row_inf[i] == NULL)
 				{
-					sprintf_s(table_name, sizeof(table_name), "tab%d", (int)(time(NULL)-1360000000L)); //генерируем системное имя новой таблицы
+					sprintf_s(table_name, sizeof(table_name), "tab%d", (int)(time(NULL)-1360000000L)); //РіРµРЅРµСЂРёСЂСѓРµРј СЃРёСЃС‚РµРјРЅРѕРµ РёРјСЏ РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
 				}
 				else if(strlen(row_inf[i]) == 0)
 				{
-					sprintf_s(table_name, sizeof(table_name), "tab%d", (int)(time(NULL)-1360000000L)); //генерируем системное имя новой таблицы
+					sprintf_s(table_name, sizeof(table_name), "tab%d", (int)(time(NULL)-1360000000L)); //РіРµРЅРµСЂРёСЂСѓРµРј СЃРёСЃС‚РµРјРЅРѕРµ РёРјСЏ РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
 				}
 				else
-					strcpy_s(table_name, sizeof(table_name), row_inf[i]); //запоминаем системное имя новой таблицы
+					strcpy_s(table_name, sizeof(table_name), row_inf[i]); //Р·Р°РїРѕРјРёРЅР°РµРј СЃРёСЃС‚РµРјРЅРѕРµ РёРјСЏ РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹
 
-				//добавление в all_tables:
+				//РґРѕР±Р°РІР»РµРЅРёРµ РІ all_tables:
 				if(column_index_all_tables_name)
 				{
 					strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), ",");
@@ -3176,22 +3176,22 @@ new_col_select_value\
 				column_index_all_tables_name++;
 				column_index_all_tables_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), "tab_name");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", table_name);
 				strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), cmd);
 				break;
-			case 2: //char внешнее имя таблицы
+			case 2: //char РІРЅРµС€РЅРµРµ РёРјСЏ С‚Р°Р±Р»РёС†С‹
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
-					strcpy_s(column_buff, MAX_BUFF_SIZE, "Новая таблица");
+					strcpy_s(column_buff, MAX_BUFF_SIZE, "РќРѕРІР°СЏ С‚Р°Р±Р»РёС†Р°");
 				}
 				else if(strlen(row_inf[i]) == 0)
 				{
-					strcpy_s(column_buff, MAX_BUFF_SIZE, "Новая таблица");
+					strcpy_s(column_buff, MAX_BUFF_SIZE, "РќРѕРІР°СЏ С‚Р°Р±Р»РёС†Р°");
 				}
 				else
 					strcpy_s(column_buff, MAX_BUFF_SIZE, row_inf[i]);
@@ -3210,28 +3210,28 @@ new_col_select_value\
 				memset(table_title_name, 0, sizeof(table_title_name));
 				strcpy_s(table_title_name, sizeof(table_title_name), column_buff);
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), "tab_title_name");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), cmd);
 				break;
-			case 3: //char код кнопки 'сохранить'
+			case 3: //char РєРѕРґ РєРЅРѕРїРєРё 'СЃРѕС…СЂР°РЅРёС‚СЊ'
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				strcpy_s(column_buff, MAX_BUFF_SIZE, "<p align=center>");
 				if(row_inf[i] == NULL)
 				{
-					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"submit\" form=\"mega_form\" value=\"Сохранить\" />");
+					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"submit\" form=\"mega_form\" value=\"РЎРѕС…СЂР°РЅРёС‚СЊ\" />");
 				}
 				else if(strlen(row_inf[i]) == 0)
 				{
-					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"submit\" form=\"mega_form\" value=\"Сохранить\" />");
+					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"submit\" form=\"mega_form\" value=\"РЎРѕС…СЂР°РЅРёС‚СЊ\" />");
 				}
 				else
 					strcat_s(column_buff, MAX_BUFF_SIZE, row_inf[i]);
 				break;
-			case 4: //char код кнопки '+'
+			case 4: //char РєРѕРґ РєРЅРѕРїРєРё '+'
 				if(row_inf[i] == NULL)
 				{
 					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"button\" form=\"mega_form\" onClick=\"myreqins('insert_new')\" value=\"+\" />");
@@ -3256,14 +3256,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_buttons");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 5: //int флаг 'системная таблица'
+			case 5: //int С„Р»Р°Рі 'СЃРёСЃС‚РµРјРЅР°СЏ С‚Р°Р±Р»РёС†Р°'
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3287,12 +3287,12 @@ new_col_select_value\
 				column_index_all_tables_name++;
 				column_index_all_tables_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), "tab_system");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), column_buff);
 				break;
-			case 6: //char код заголовка файла
+			case 6: //char РєРѕРґ Р·Р°РіРѕР»РѕРІРєР° С„Р°Р№Р»Р°
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3316,14 +3316,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_head");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 7: //char код конца файла
+			case 7: //char РєРѕРґ РєРѕРЅС†Р° С„Р°Р№Р»Р°
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3347,14 +3347,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_end");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 8: //char код начала таблицы
+			case 8: //char РєРѕРґ РЅР°С‡Р°Р»Р° С‚Р°Р±Р»РёС†С‹
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3378,14 +3378,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_tab_begin");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 9: //char код конца таблицы
+			case 9: //char РєРѕРґ РєРѕРЅС†Р° С‚Р°Р±Р»РёС†С‹
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3409,14 +3409,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_tab_end");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 10: //char код начала столбца
+			case 10: //char РєРѕРґ РЅР°С‡Р°Р»Р° СЃС‚РѕР»Р±С†Р°
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3440,14 +3440,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_col_begin");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 11: //char код конца столбца
+			case 11: //char РєРѕРґ РєРѕРЅС†Р° СЃС‚РѕР»Р±С†Р°
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3471,14 +3471,14 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "html_col_end");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'",column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 12: //char http-заголовок
+			case 12: //char http-Р·Р°РіРѕР»РѕРІРѕРє
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3502,16 +3502,16 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "http_head");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
 				break;
-			case 13: //char insert-строка по-умолчанию
+			case 13: //char insert-СЃС‚СЂРѕРєР° РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 				break;
-			case 14: //int тип новой таблицы (вертикальная/горизонтальная)
+			case 14: //int С‚РёРї РЅРѕРІРѕР№ С‚Р°Р±Р»РёС†С‹ (РІРµСЂС‚РёРєР°Р»СЊРЅР°СЏ/РіРѕСЂРёР·РѕРЅС‚Р°Р»СЊРЅР°СЏ)
 				memset(column_buff, 0, MAX_BUFF_SIZE);
 				if(row_inf[i] == NULL)
 				{
@@ -3535,9 +3535,9 @@ new_col_select_value\
 				column_index_tab_info_name++;
 				column_index_tab_info_values++;
 
-				//для имён столбцов:
+				//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 				strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), "vertical");
-				//для значений:
+				//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 				memset(cmd, 0, MAX_BUFF_SIZE);
 				sprintf_s(cmd, MAX_BUFF_SIZE, "%s", column_buff);
 				strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), cmd);
@@ -3564,7 +3564,7 @@ new_col_select_value\
 //13	new_col_search
 //14	new_col_select_value
 
-	//формируем запросы
+	//С„РѕСЂРјРёСЂСѓРµРј Р·Р°РїСЂРѕСЃС‹
 	memset(main_tab, 0, MAX_BUFF_SIZE);
 	sprintf_s(main_tab, MAX_BUFF_SIZE, "CREATE TABLE %s(id int auto_increment not null, key(id), ", table_name);
 
@@ -3598,7 +3598,7 @@ new_col_select_value\
 			}
 			switch(i)
 			{
-				case 1: //char системное имя столбца
+				case 1: //char СЃРёСЃС‚РµРјРЅРѕРµ РёРјСЏ СЃС‚РѕР»Р±С†Р°
 					memset(column_name, 0, sizeof(column_name));
 
 					if(column_index_main_tab)
@@ -3622,31 +3622,31 @@ new_col_select_value\
 					column_index_tab_columns_values++;
 					column_index_tab_default_name++;
 
-					//генерируем запрос на создание самой таблицы
+					//РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° СЃРѕР·РґР°РЅРёРµ СЃР°РјРѕР№ С‚Р°Р±Р»РёС†С‹
 					if(strlen(row_col[i]) != 0)
 					{
 						sprintf_s(column_name, sizeof(column_name), "%s", row_col[i]);
 					}
-					else //генерируем описание столбца для зароса 'create table ...'
+					else //РіРµРЅРµСЂРёСЂСѓРµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†Р° РґР»СЏ Р·Р°СЂРѕСЃР° 'create table ...'
 					{
 						sprintf_s(column_name, sizeof(column_name),  "col%d", column_index_main_tab);
 					}
 					sprintf_s(cmd, MAX_BUFF_SIZE, "%s mediumtext charset 'cp1251' not null", column_name);
-					strcat_s(main_tab, MAX_BUFF_SIZE-strlen(main_tab), cmd); //добавляем имя столбца в SQL-запрос
+					strcat_s(main_tab, MAX_BUFF_SIZE-strlen(main_tab), cmd); //РґРѕР±Р°РІР»СЏРµРј РёРјСЏ СЃС‚РѕР»Р±С†Р° РІ SQL-Р·Р°РїСЂРѕСЃ
 
-					//генерируем запрос на добавление в tab_columns
-					//для имён столбцов:
+					//РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° РґРѕР±Р°РІР»РµРЅРёРµ РІ tab_columns
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_name");
-					//для значений столбцов:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№ СЃС‚РѕР»Р±С†РѕРІ:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_name);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 
-					//генерируем запрос на добавление в tab_info значений по-умолчанию
-					//для имён по-умолчанию
+					//РіРµРЅРµСЂРёСЂСѓРµРј Р·Р°РїСЂРѕСЃ РЅР° РґРѕР±Р°РІР»РµРЅРёРµ РІ tab_info Р·РЅР°С‡РµРЅРёР№ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
+					//РґР»СЏ РёРјС‘РЅ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 					strcat_s(tab_default_name, MAX_BUFF_SIZE-strlen(tab_default_name), column_name);
 					break;
-				case 2: //int тип столбца
+				case 2: //int С‚РёРї СЃС‚РѕР»Р±С†Р°
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3670,12 +3670,12 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_type");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), column_buff);
 					break;
-				case 3: //int ширина столбца
+				case 3: //int С€РёСЂРёРЅР° СЃС‚РѕР»Р±С†Р°
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3699,12 +3699,12 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_size");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), column_buff);
 					break;
-				case 4: //char html-код строки
+				case 4: //char html-РєРѕРґ СЃС‚СЂРѕРєРё
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3728,14 +3728,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "html_code");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", make_screen(column_buff));
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 5: //char html-код заголовка столбца в шапке таблицы
+				case 5: //char html-РєРѕРґ Р·Р°РіРѕР»РѕРІРєР° СЃС‚РѕР»Р±С†Р° РІ С€Р°РїРєРµ С‚Р°Р±Р»РёС†С‹
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3759,14 +3759,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "html_hat");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 6: //char текст заголовка столбца
+				case 6: //char С‚РµРєСЃС‚ Р·Р°РіРѕР»РѕРІРєР° СЃС‚РѕР»Р±С†Р°
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3790,14 +3790,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_hat");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 7: //int порядковый номер столбца в таблице
+				case 7: //int РїРѕСЂСЏРґРєРѕРІС‹Р№ РЅРѕРјРµСЂ СЃС‚РѕР»Р±С†Р° РІ С‚Р°Р±Р»РёС†Рµ
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3821,14 +3821,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_num");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "%s", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 8: //int флаг 'скрыть столбец'
+				case 8: //int С„Р»Р°Рі 'СЃРєСЂС‹С‚СЊ СЃС‚РѕР»Р±РµС†'
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3852,14 +3852,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "hidden");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "%s", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 9: //char значение по-умолчанию
+				case 9: //char Р·РЅР°С‡РµРЅРёРµ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3878,15 +3878,15 @@ new_col_select_value\
 					}
 					column_index_tab_default_values++;
 
-					//вставляем в 'tab_info' значения для добавления по-умолчанию
-					//для значений по-умолчанию:
+					//РІСЃС‚Р°РІР»СЏРµРј РІ 'tab_info' Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РґРѕР±Р°РІР»РµРЅРёСЏ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "'%s'", make_screen(column_buff));
 					strcat_s(tab_default_values, MAX_BUFF_SIZE-strlen(tab_default_values), cmd);
 					break;
-				case 10: //int флаг 'фиксировать ширину'
+				case 10: //int С„Р»Р°Рі 'С„РёРєСЃРёСЂРѕРІР°С‚СЊ С€РёСЂРёРЅСѓ'
 					break;
-				case 11: //int флаг 'сортировать по данному столбцу'
+				case 11: //int С„Р»Р°Рі 'СЃРѕСЂС‚РёСЂРѕРІР°С‚СЊ РїРѕ РґР°РЅРЅРѕРјСѓ СЃС‚РѕР»Р±С†Сѓ'
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3910,16 +3910,16 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_sort");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "%s", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 12: //int флаг 'группировать по данному столбцу'
+				case 12: //int С„Р»Р°Рі 'РіСЂСѓРїРїРёСЂРѕРІР°С‚СЊ РїРѕ РґР°РЅРЅРѕРјСѓ СЃС‚РѕР»Р±С†Сѓ'
 					break;
-				case 13: //int флаг 'искать в данном столбце'
+				case 13: //int С„Р»Р°Рі 'РёСЃРєР°С‚СЊ РІ РґР°РЅРЅРѕРј СЃС‚РѕР»Р±С†Рµ'
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3943,14 +3943,14 @@ new_col_select_value\
 					column_index_tab_columns_name++;
 					column_index_tab_columns_values++;
 
-					//для имён столбцов:
+					//РґР»СЏ РёРјС‘РЅ СЃС‚РѕР»Р±С†РѕРІ:
 					strcat_s(tab_columns_name, MAX_BUFF_SIZE-strlen(tab_columns_name), "col_search");
-					//для значений:
+					//РґР»СЏ Р·РЅР°С‡РµРЅРёР№:
 					memset(cmd, 0, MAX_BUFF_SIZE);
 					sprintf_s(cmd, MAX_BUFF_SIZE, "%s", column_buff);
 					strcat_s(tab_columns_values, MAX_BUFF_SIZE-strlen(tab_columns_values), cmd);
 					break;
-				case 14: //char значения для выбора
+				case 14: //char Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ РІС‹Р±РѕСЂР°
 					memset(column_buff, 0, MAX_BUFF_SIZE);
 					if(row_col[i] == NULL)
 					{
@@ -3963,7 +3963,7 @@ new_col_select_value\
 					else
 						strcpy_s(column_buff, MAX_BUFF_SIZE, row_col[i]);
 
-					//заносим буфер (если он не пуст) в переменную с выбором
+					//Р·Р°РЅРѕСЃРёРј Р±СѓС„РµСЂ (РµСЃР»Рё РѕРЅ РЅРµ РїСѓСЃС‚) РІ РїРµСЂРµРјРµРЅРЅСѓСЋ СЃ РІС‹Р±РѕСЂРѕРј
 					if(strlen(column_buff) > 0)
 					{
 						value_of_select[value_of_select_index][0] = new char[strlen(column_name)+1];
@@ -3987,38 +3987,38 @@ new_col_select_value\
 		len = strlen(tab_columns_values)+TAB_BUFF_UP;
 		columns_sql_buff[column_index] = new char[len];
 		memset(columns_sql_buff[column_index], 0, len);
-		strcpy_s(columns_sql_buff[column_index], len-1, cmd); //теперь columns_sql_buff содержит почти готовый запрос
+		strcpy_s(columns_sql_buff[column_index], len-1, cmd); //С‚РµРїРµСЂСЊ columns_sql_buff СЃРѕРґРµСЂР¶РёС‚ РїРѕС‡С‚Рё РіРѕС‚РѕРІС‹Р№ Р·Р°РїСЂРѕСЃ
 		column_index++;
 	}
 
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	strcpy_s(cmd, MAX_BUFF_SIZE, "INSERT INTO tab_columns(col_name,col_type,html_code,html_hat,col_hat,col_size,col_num,hidden,col_sort,col_search,tab_id) \
 VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d cols=%d onChange=\"myreq(&#039;%s_%d&#039;)\">%s</textarea></td>\
-','<td align=center><h4>%s</h4></td>','Ключ',4,0,1,0,0");
+','<td align=center><h4>%s</h4></td>','РљР»СЋС‡',4,0,1,0,0");
 	len = strlen(cmd)+TAB_BUFF_UP;
 	columns_sql_buff[column_index] = new char[len];
 	memset(columns_sql_buff[column_index], 0, len);
-	strcpy_s(columns_sql_buff[column_index], len-1, cmd); //теперь columns_sql_buff содержит почти готовый запрос
+	strcpy_s(columns_sql_buff[column_index], len-1, cmd); //С‚РµРїРµСЂСЊ columns_sql_buff СЃРѕРґРµСЂР¶РёС‚ РїРѕС‡С‚Рё РіРѕС‚РѕРІС‹Р№ Р·Р°РїСЂРѕСЃ
 	column_index++;
 
 	mysql_free_result(res_inf);
 	mysql_free_result(res_col);
 
-	//1) таблица должна заканчиваться: ") charset 'cp1251'"
-	//2) дополнить tab_info значением по default 'insert into ...'
-	//3) дополнить tab_id для таблиц tab_info и tab_columns
+	//1) С‚Р°Р±Р»РёС†Р° РґРѕР»Р¶РЅР° Р·Р°РєР°РЅС‡РёРІР°С‚СЊСЃСЏ: ") charset 'cp1251'"
+	//2) РґРѕРїРѕР»РЅРёС‚СЊ tab_info Р·РЅР°С‡РµРЅРёРµРј РїРѕ default 'insert into ...'
+	//3) РґРѕРїРѕР»РЅРёС‚СЊ tab_id РґР»СЏ С‚Р°Р±Р»РёС† tab_info Рё tab_columns
 
-	//заканчиваем генерацию запроса
+	//Р·Р°РєР°РЅС‡РёРІР°РµРј РіРµРЅРµСЂР°С†РёСЋ Р·Р°РїСЂРѕСЃР°
 	strcat_s(main_tab, MAX_BUFF_SIZE-strlen(main_tab), ") charset 'cp1251'");
 	fprintf(stderr, "%s\n\n",main_tab);
-	//создаём саму таблицу
+	//СЃРѕР·РґР°С‘Рј СЃР°РјСѓ С‚Р°Р±Р»РёС†Сѓ
 	if(mysql_query(pmysql, main_tab) != 0)
 	{
 		FREE_ALL_VARS;
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	//сохраняем имя таблицы во временную таблицу new_table_info (для избежания дубля)
+	//СЃРѕС…СЂР°РЅСЏРµРј РёРјСЏ С‚Р°Р±Р»РёС†С‹ РІРѕ РІСЂРµРјРµРЅРЅСѓСЋ С‚Р°Р±Р»РёС†Сѓ new_table_info (РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ РґСѓР±Р»СЏ)
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	sprintf_s(cmd, MAX_BUFF_SIZE, "UPDATE new_table_info SET new_tab_name='%s'", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
@@ -4027,24 +4027,24 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	//тут вносим в all_tables и определяем tab_id
-	//добавляем кнопку таблицы:
+	//С‚СѓС‚ РІРЅРѕСЃРёРј РІ all_tables Рё РѕРїСЂРµРґРµР»СЏРµРј tab_id
+	//РґРѕР±Р°РІР»СЏРµРј РєРЅРѕРїРєСѓ С‚Р°Р±Р»РёС†С‹:
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	sprintf_s(cmd, MAX_BUFF_SIZE, "'<input type=\"button\" value=\"%s\" onclick=\"location.href=&#039;http://%%s/%s&#039;\" />'", strlen(table_title_name)?table_title_name:table_name, table_name);
 	strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), ",");
 	strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), ",");
 	strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), "tab_button");
 	strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), cmd);
-	//добавляем заглушку на кнопку таблицы:
+	//РґРѕР±Р°РІР»СЏРµРј Р·Р°РіР»СѓС€РєСѓ РЅР° РєРЅРѕРїРєСѓ С‚Р°Р±Р»РёС†С‹:
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), ",");
 	strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), ",");
 	strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), "delete_button");
 	strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), "' '");
-	//завершаем генерацию запроса:
+	//Р·Р°РІРµСЂС€Р°РµРј РіРµРЅРµСЂР°С†РёСЋ Р·Р°РїСЂРѕСЃР°:
 	strcat_s(all_tables_name, MAX_BUFF_SIZE-strlen(all_tables_name), ")");
 	strcat_s(all_tables_values, MAX_BUFF_SIZE-strlen(all_tables_values), ")");
-	//формируем окончательный SQL-запрос и выполняем его:
+	//С„РѕСЂРјРёСЂСѓРµРј РѕРєРѕРЅС‡Р°С‚РµР»СЊРЅС‹Р№ SQL-Р·Р°РїСЂРѕСЃ Рё РІС‹РїРѕР»РЅСЏРµРј РµРіРѕ:
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	strcpy_s(cmd, MAX_BUFF_SIZE, all_tables_name);
 	strcat_s(cmd, MAX_BUFF_SIZE-strlen(cmd), all_tables_values);
@@ -4054,7 +4054,7 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		FREE_ALL_VARS;
 		mysql_error_thread_exit(pmysql, ns);
 	}
-	//тут определяем tab_id:
+	//С‚СѓС‚ РѕРїСЂРµРґРµР»СЏРµРј tab_id:
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	sprintf_s(cmd, MAX_BUFF_SIZE, "SELECT id FROM all_tables WHERE tab_name='%s'", table_name);
 	fprintf(stderr, "%s\n\n",cmd);
@@ -4082,9 +4082,9 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 	strcpy_s(tab_id, sizeof(tab_id), row_inf[0]);
 	mysql_free_result(res_inf);
 
-	//дополняем all_tables кнопкой для удаления таблицы
+	//РґРѕРїРѕР»РЅСЏРµРј all_tables РєРЅРѕРїРєРѕР№ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ С‚Р°Р±Р»РёС†С‹
 	memset(cmd, 0, MAX_BUFF_SIZE);
-	sprintf_s(cmd, MAX_BUFF_SIZE, "UPDATE all_tables SET delete_button=\"<input type='button' value='Удалить' form='frm' onclick=\\\"del_tab('delete_table','tab_name_%s')\\\" />\" WHERE id=%s", tab_id, tab_id);
+	sprintf_s(cmd, MAX_BUFF_SIZE, "UPDATE all_tables SET delete_button=\"<input type='button' value='РЈРґР°Р»РёС‚СЊ' form='frm' onclick=\\\"del_tab('delete_table','tab_name_%s')\\\" />\" WHERE id=%s", tab_id, tab_id);
 	fprintf(stderr, "%s\n\n",cmd);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4092,7 +4092,7 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	//дополняем tab_info значением по default 'insert into ...'
+	//РґРѕРїРѕР»РЅСЏРµРј tab_info Р·РЅР°С‡РµРЅРёРµРј РїРѕ default 'insert into ...'
 	strcat_s(tab_default_name, MAX_BUFF_SIZE-strlen(tab_default_name), ")");
 	strcat_s(tab_default_values, MAX_BUFF_SIZE-strlen(tab_default_values), ")\"");
 	strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), ",default_insert");
@@ -4100,15 +4100,15 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 	strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), tab_default_name);
 	strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), tab_default_values);
 
-	//дополняем tab_id для таблиц tab_info и tab_columns
+	//РґРѕРїРѕР»РЅСЏРµРј tab_id РґР»СЏ С‚Р°Р±Р»РёС† tab_info Рё tab_columns
 	//tab_info:
 	strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), ",tab_id");
 	strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), ",");
 	strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), tab_id);
 	strcat_s(tab_info_name, MAX_BUFF_SIZE-strlen(tab_info_name), ")");
 	strcat_s(tab_info_values, MAX_BUFF_SIZE-strlen(tab_info_values), ")");
-	//вносим значения в таблицу tab_info
-	//собираем tab_info:
+	//РІРЅРѕСЃРёРј Р·РЅР°С‡РµРЅРёСЏ РІ С‚Р°Р±Р»РёС†Сѓ tab_info
+	//СЃРѕР±РёСЂР°РµРј tab_info:
 	memset(cmd, 0, MAX_BUFF_SIZE);
 	strcpy_s(cmd, MAX_BUFF_SIZE, tab_info_name);
 	strcat_s(cmd, MAX_BUFF_SIZE-strlen(cmd), tab_info_values);
@@ -4119,7 +4119,7 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	//вносим значения в таблицу tab_columns
+	//РІРЅРѕСЃРёРј Р·РЅР°С‡РµРЅРёСЏ РІ С‚Р°Р±Р»РёС†Сѓ tab_columns
 	for(i = 0; i < column_index; ++i)
 	{
 		strcat_s(columns_sql_buff[i], strlen(columns_sql_buff[i])+TAB_BUFF_UP, ",");
@@ -4133,7 +4133,7 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		}
 	}
 
-	//вносим значения ячеек типа 'выбор'
+	//РІРЅРѕСЃРёРј Р·РЅР°С‡РµРЅРёСЏ СЏС‡РµРµРє С‚РёРїР° 'РІС‹Р±РѕСЂ'
 	for(i = 0; i < value_of_select_index; ++i)
 	{
 		memset(cmd, 0, MAX_BUFF_SIZE);
@@ -4164,7 +4164,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	cmd = new char[MAX_BUFF_SIZE];
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
-	//удаляем описание столбцов таблицы
+	//СѓРґР°Р»СЏРµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_columns WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4173,7 +4173,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
-	//удаляем описание таблицы
+	//СѓРґР°Р»СЏРµРј РѕРїРёСЃР°РЅРёРµ С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_info WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4182,7 +4182,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
-	//удаляем описание столбцов типа 'выбор' таблицы
+	//СѓРґР°Р»СЏРµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ С‚РёРїР° 'РІС‹Р±РѕСЂ' С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_selects WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4191,7 +4191,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
-	//удаляем описание столбцов типа 'выборка' таблицы
+	//СѓРґР°Р»СЏРµРј РѕРїРёСЃР°РЅРёРµ СЃС‚РѕР»Р±С†РѕРІ С‚РёРїР° 'РІС‹Р±РѕСЂРєР°' С‚Р°Р±Р»РёС†С‹
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_dynamic WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4200,7 +4200,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
-	//удаляем запись о таблице
+	//СѓРґР°Р»СЏРµРј Р·Р°РїРёСЃСЊ Рѕ С‚Р°Р±Р»РёС†Рµ
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM all_tables WHERE tab_name=\"%s\"", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4208,7 +4208,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	//удаляем саму таблицу
+	//СѓРґР°Р»СЏРµРј СЃР°РјСѓ С‚Р°Р±Р»РёС†Сѓ
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DROP TABLE %s", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
