@@ -2,129 +2,66 @@
 
 #include"quit.h"
 
-#define MAX_HEAD_SIZE 40960
-#define MAX_CMD_SIZE 40960
-#define MAX_BUFF_SIZE 81920
-#define TAB_BUFF_UP 128
-#define MAX_COLUMNS_IN_TABLE 256
-#define MAX_VALUES_IN_SELECT 256
-#define FREE_ALL_VARS	delete [] cmd;\
-			delete [] column_buff;\
-			delete [] main_tab;\
-			delete [] tab_info_name;\
-			delete [] tab_info_values;\
-			delete [] tab_columns_name;\
-			delete [] tab_columns_values;\
-			delete [] tab_default_name;\
-			delete [] tab_default_values;\
-			delete [] all_tables_name;\
-			delete [] all_tables_values;\
+#define FREE_ALL_VARS	free(cmd);\
+			free(column_buff);\
+			free(main_tab);\
+			free(tab_info_name);\
+			free(tab_info_values);\
+			free(tab_columns_name);\
+			free(tab_columns_values);\
+			free(tab_default_name);\
+			free(tab_default_values);\
+			free(all_tables_name);\
+			free(all_tables_values);\
 			for(i = 0; i < column_index; ++i)\
 			{\
 				if(columns_sql_buff[i] != NULL)\
-					delete columns_sql_buff[i];\
+				free(columns_sql_buff[i]);\
 			}\
 			for(i = 0; i < value_of_select_index; ++i)\
 			{\
 				if(value_of_select[i][0] != NULL)\
-					delete value_of_select[i][0];\
+				free(value_of_select[i][0]);\
 				if(value_of_select[i][1] != NULL)\
-					delete value_of_select[i][1];\
+				free(value_of_select[i][1]);\
 			}
 #define FREE_DATA_OF_COLUMNS	for(i = 0; i < cols_num; ++i)\
 				{\
 					if(tab_col[i] != NULL)\
 					{\
-						delete [] tab_col[i]->name;\
-						delete [] tab_col[i]->html_code;\
-						delete [] tab_col[i]->html_hat;\
-						delete [] tab_col[i]->col_hat;\
+						free(tab_col[i]->name);\
+						free(tab_col[i]->html_code);\
+						free(tab_col[i]->html_hat);\
+						free(tab_col[i]->col_hat);\
 						if(tab_col[i]->selects != NULL)\
 						{\
 							for(j = 0; j < MAX_VALUES_IN_SELECT; ++j)\
 							{\
 								if(tab_col[i]->selects->values[j] != NULL)\
-									delete [] tab_col[i]->selects->values[j];\
+									free(tab_col[i]->selects->values[j]);\
 								if(tab_col[i]->selects->selects[j] != NULL)\
-									delete [] tab_col[i]->selects->selects[j];\
+									free(tab_col[i]->selects->selects[j]);\
 							}\
-							delete tab_col[i]->selects;\
+							free(tab_col[i]->selects);\
 						}\
 						while(tab_col[i]->dynamic != NULL)\
 						{\
-							select_values *svlist;\
+							struct select_values *svlist;\
 							svlist = tab_col[i]->dynamic->svnext;\
 							for(j = 0; j < MAX_VALUES_IN_SELECT; ++j)\
 							{\
 								if(tab_col[i]->dynamic->values[j] != NULL)\
-									delete [] tab_col[i]->dynamic->values[j];\
+									free(tab_col[i]->dynamic->values[j]);\
 								if(tab_col[i]->dynamic->selects[j] != NULL)\
-									delete [] tab_col[i]->dynamic->selects[j];\
+									free(tab_col[i]->dynamic->selects[j]);\
 							}\
-							delete tab_col[i]->dynamic;\
+							free(tab_col[i]->dynamic);\
 							tab_col[i]->dynamic = svlist;\
 						}\
-						delete tab_col[i];\
+						free(tab_col[i]);\
 					}\
 				}
 
-
-struct id_value_data_struct;
-struct table_column;
-struct select_values;
-
-struct id_value_data_struct {
-	int id;
-	char *name;
-	char *value;
-	int index;
-};
-
-struct table_column {
-	int id;
-	int tab_id;
-	char *name;
-	int type;
-	char *html_code;
-	char *html_hat;
-	char *col_hat;
-	int col_size;
-	int num;
-	int sort;
-	int desc;
-	int col_desc_id;
-	select_values *selects;
-	select_values *dynamic;
-};
-
-struct select_values {
-	int count;
-	int tab_index; //для формирования динамических списков полей таблиц (по-сути это id таблицы)
-	char *values[MAX_VALUES_IN_SELECT];
-	char *selects[MAX_VALUES_IN_SELECT];
-	select_values *svnext; //следующий список
-};
-
-void mysql_error_thread_exit(MYSQL * const, SOCKET * const);
-void error_thread_exit(MYSQL * const, SOCKET * const, char const * const);
-char *get_head_value(char * const, char const * const);
-int get_some_value(char * const, char const * const, char * const);
-int get_id_value(char * const, id_value_data_struct * const);
-void run_commands(char * const, MYSQL * const, SOCKET * const);
-char *make_lt_gt(char const * const);
-char *make_style(char const * const);
-void cp_to_utf8(char *out_text, const char *str, int from_cp, size_t buf_size);
-void utf8_to_cp(char *out_text, const char *str, int to_cp, size_t buf_size);
-
-void create_new_table(MYSQL * const, SOCKET * const);
-void delete_table(char const * const, MYSQL * const, SOCKET * const);
-
-#ifdef WIN32
-DWORD WINAPI
-#else
-void *
-#endif
-ProcessingThread(void *lpParams);
 
 int PORTNUM = 7770;
 
@@ -134,10 +71,12 @@ int main(int argc, char *argv[])
 #ifdef WIN32
   WSADATA wsaData;
 #endif
+  const int ENABLED_1=1;
   int nport, k;
   struct sockaddr_in serv_addr, clnt_addr;
   char ProductName[] = "QuiT";
   char Version[] = "v1.1.7";
+  char Author[]="Bombo";
 #ifdef WIN32
   NOTIFYICONDATA idata;
   static const GUID myGUID = {0x23977b55, 0x10e0, 0x4041, {0xb8, 0x62, 0xb1, 0x95, 0x41, 0x96, 0x36, 0x69}};
@@ -147,20 +86,22 @@ int main(int argc, char *argv[])
   pthread_attr_t attr;
 #endif
 
-  bool fsilentmode;
-
-  fsilentmode = false;
-
+#ifdef WIN32
+  int fsilentmode;
+  fsilentmode = FALSE;
+#endif
 
   //обработка аргументов и помощь по программе
   if(argc > 1)
   {
 	  for(k = 1; k < argc; ++k)
 	  {
+#ifdef WIN32
 		  if(strncmp(argv[k], "-s", 2) == 0)
 		  {
-			fsilentmode = true;
+			fsilentmode = TRUE;
 		  }
+#endif
 		  if(strncmp(argv[k], "-p", 2) == 0 && argc > k)
 		  {
 			  nport = atoi(argv[k+1]);
@@ -169,7 +110,7 @@ int main(int argc, char *argv[])
 		  }
 		  if(strncmp(argv[k], "-h", 2) == 0)
 		  {
-			  fprintf(stderr, "%s %s\nUsage: %s [-h] [-p port] [-s]\n\n\t\t-h\t\thelp (this message)\n\t\t-p port\t\tport number (is 7770 by default)\n\t\t-s\t\tsilent mode\n\n", ProductName, Version, ProductName);
+			  fprintf(stderr, "%s %s\nUsage: %s [-h] [-p port] [-s]\n\n\t\t-h\t\thelp (this message)\n\t\t-p port\t\tport number (%d is default)\n\t\t-s\t\tsilent mode\n\n", ProductName, Version, ProductName, PORTNUM);
 			  exit(0);
 		  }
 	  }
@@ -182,7 +123,7 @@ int main(int argc, char *argv[])
 	idata.hWnd = GetConsoleWindow();
 	idata.guidItem = myGUID;
 	idata.uFlags = NIF_ICON | NIF_TIP | NIF_GUID;
-	idata.hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+	idata.hIcon = NULL; //LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
 	StringCchCopy(idata.szTip, ARRAYSIZE(idata.szTip), ProductName);
 	ShowWindow(GetConsoleWindow(), SW_HIDE);
 	Shell_NotifyIcon(NIM_ADD,&idata);
@@ -199,6 +140,15 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+#ifndef WIN32
+  // set socket reused (Linux)
+  if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &ENABLED_1, sizeof(int)) < 0)
+  {
+    fprintf(stderr, "error: setsockopt()\n");
+    exit(1111);
+  }
+#endif
+
   memset(&serv_addr, 0, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_addr.s_addr = INADDR_ANY;
@@ -208,47 +158,47 @@ int main(int argc, char *argv[])
   {
     fprintf(stderr, "error: bind()\n");
 #ifdef LINUX
-		shutdown(s, SHUT_RDWR);
+    shutdown(s, SHUT_RDWR);
 #endif
     closesocket(s);
     exit(2);
   }
 
-  fprintf(stderr, "%s %s\n", ProductName, Version);
+  fprintf(stderr, "%s %s by %s\n", ProductName, Version, Author);
   fprintf(stderr, "server is ready: port %d\n", PORTNUM);
 
   if(listen(s, 20) == -1)
   {
     fprintf(stderr, "error: listen()\n");
 #ifdef LINUX
-		shutdown(s, SHUT_RDWR);
+    shutdown(s, SHUT_RDWR);
 #endif
     closesocket(s);
     exit(3);
   }
-								
+
   printf("begin..\n");
 
   while(1)
   {
     int addrlen;
-  	DWORD dwThread;
+    DWORD dwThread;
 
     memset(&clnt_addr, 0, sizeof(clnt_addr));
     addrlen = sizeof(clnt_addr);
 
-	//ждём соединения
+    //ждём соединения
     if((ns = accept(s, (struct sockaddr *) &clnt_addr, (socklen_t *)&addrlen)) == -1)
     {
       fprintf(stderr, "error: accept()\n");
 #ifdef LINUX
-		shutdown(s, SHUT_RDWR);
+      shutdown(s, SHUT_RDWR);
 #endif
       closesocket(s);
       exit(4);
     }
 
-    fprintf(stderr, "client = %s\n", inet_ntoa(clnt_addr.sin_addr));
+    //fprintf(stderr, "client = %s\n", inet_ntoa(clnt_addr.sin_addr));
 
 #ifdef WIN32
     //запускаем поток обработки входящего соединения
@@ -300,67 +250,64 @@ ProcessingThread(void *lpParams)
 	SOCKET ns, check_s;
 	int nport;
 	struct sockaddr_in clnt_addr;
-  struct hostent *hp;
+	struct hostent *hp;
 	MYSQL mysql;
-	MYSQL_RES *res, *res_tbl, *res_col, *res_srv, *res_dsc;
+	MYSQL_RES *res=NULL, *res_tbl, *res_col, *res_srv, *res_dsc;
 	MYSQL_ROW row, row_tbl, row_col, row_srv, row_dsc;
-	int num, num_tbl, num_col, num_srv, num_dsc;
-	char head[MAX_HEAD_SIZE];		//используется в качестве буфера!!!
-	char cmd[MAX_CMD_SIZE];		//буфер строки таблицы
-	char buf[MAX_BUFF_SIZE];		//буфер генерируемого html-документа
-	char main_table[256];	//буфер для имени текущей таблицы
+	int num, num_tbl, num_col=0, num_srv=0, num_dsc;
+	char head[MAX_HEAD_SIZE];//используется в качестве буфера!!!
+	char cmd[MAX_CMD_SIZE];	 //буфер строки таблицы
+	char buf[MAX_BUFF_SIZE]; //буфер генерируемого html-документа
+	char main_table[256];	 //буфер для имени текущей таблицы
 	char main_server[256];   //буфер для имени хоста
-	char next_table[256];	//буфер имени таблицы для перехода
+	char next_table[256];	 //буфер имени таблицы для перехода
 	char command_list[2048]; //буфер для списка команд
-	int nbytes, nsumbytes;		//количество принятых/отправленных байт
+	int nbytes, nsumbytes;	 //количество принятых/отправленных байт
 	char *send_data;
 	size_t nbytes_sent, size_to_send;
-	bool ffirst, fselects, fdynamic, fnodelim, fdelrow, fnewtable;
+	int ffirst=0, fselects=0, fdynamic=0, fnodelim=0, fdelrow=0, fnewtable=0;
 	int i, j, k, l, m, cols_num, index_row;
-	int area_width, area_width_min;
+	//int area_width, area_width_min;
 	int len, max, data_size;
 	char *ptr, *port_ptr, *ptr_del;
 	struct id_value_data_struct id_value_data;
 	struct table_column *tab_col[MAX_COLUMNS_IN_TABLE]; //накладывается ограничение на количество столбцов в таблице
-	char Author[]="Bombo";
 
-	fselects = false; //начальная инициализация флага "таблица содержит поля выбора"
-	fdynamic = false; // -||- "таблица содержит поля выборки"
-	fdelrow = false;  // -||- "удалить строки"
-	fnewtable = false;// -||- "создаётся новая таблица"
+	fselects = FALSE; //начальная инициализация флага "таблица содержит поля выбора"
+	fdynamic = FALSE; // -||- "таблица содержит поля выборки"
+	fdelrow = FALSE;  // -||- "удалить строки"
+	fnewtable = FALSE;// -||- "создаётся новая таблица"
 
 	ns = *((SOCKET *)lpParams);
-	area_width = 20; //ширина столбца в символах
-  max = 0;
-
-  Author[0] = 'B'; //non warning
+	//area_width = 20; //ширина столбца в символах
+	max = 0;
 
 	if(!mysql_init(&mysql))
 	{
 	  fprintf(stderr, "error: mysql_init()\n");
 	  closesocket(ns);
-#ifdef WIN32	  
+#ifdef WIN32
 	  ExitThread(1);
 #else
-    pthread_exit(NULL);
-#endif	  
+	  pthread_exit(NULL);
+#endif
 	}
 
-	if(!(mysql_real_connect(&mysql, 
-						  "localhost",
-						  "picsuser", "passwd", "quit", 0, NULL, CLIENT_FOUND_ROWS)))
-	{	
+	if(!(mysql_real_connect(&mysql,
+				"localhost",
+				"picsuser", "passwd", "quit", 0, NULL, CLIENT_FOUND_ROWS)))
+	{
 		fprintf(stderr, "error: connection to DB (%s)\n", mysql_error(&mysql));
 		mysql_close(&mysql);
 		closesocket(ns);
-#ifdef WIN32	  
-	  ExitThread(6);
+#ifdef WIN32
+		ExitThread(6);
 #else
-    pthread_exit(NULL);
-#endif	  
+		pthread_exit(NULL);
+#endif
 	}
 	else
-	fprintf(stderr, "opened!\n");
+	//fprintf(stderr, "opened!\n");
 
 	//  mysql_query(&mysql, "set CHARACTER SET utf8");
 	mysql_query(&mysql, "SET NAMES 'cp1251'");
@@ -368,6 +315,7 @@ ProcessingThread(void *lpParams)
 	mysql_query(&mysql, "SET @@character_set_connection='cp1251'");
 	mysql_query(&mysql, "SET @@character_set_result='cp1251'");
 	mysql_query(&mysql, "SET @@character_set_client='cp1251'");
+	mysql_query(&mysql, "SET sql_mode=''");
 //	mysql_query(&mysql, "set sql_mode='NO_BACKSLASH_ESCAPES'"); //чтобы MySQL не ругался на '\'
 
 	memset(buf, 0, sizeof(buf));
@@ -375,65 +323,66 @@ ProcessingThread(void *lpParams)
 	nsumbytes = 0;
 	data_size = 0;
 
-  nbytes = recv(ns, buf+nsumbytes, sizeof(buf), 0);
+	nbytes = recv(ns, buf+nsumbytes, sizeof(buf), 0);
 	nsumbytes += nbytes;
 	if(nbytes <= 0)
 	{
 		fprintf(stderr, "nbytes <= 0\n");
-		mysql_close(&mysql);      
+		mysql_close(&mysql);
 		closesocket(ns);
-#ifdef WIN32	  
-	  ExitThread(60);
+#ifdef WIN32
+		ExitThread(60);
 #else
-    pthread_exit(NULL);
-#endif	  
+		pthread_exit(NULL);
+#endif
 	}
-  fprintf(stderr, "\n\n%s\n\n", buf); //отладка!!!
+  memset(next_table, 0, sizeof(next_table));
+  //fprintf(stderr, "\n\n%s\n\n", buf); //отладка!!!
   if(strncmp(buf, "POST ", 5) == 0)
   {
-	  ptr = strstr(buf, "Content-Length: ");
-	  if(ptr != NULL)
-	  {
+	ptr = strstr(buf, "Content-Length: ");
+	if(ptr != NULL)
+	{
 	    ptr_del = strstr(buf, "\r\n\r\n");
 	    if(ptr_del != NULL)
 	    {
-		 		data_size = (ptr_del-buf)/sizeof(char)+4+atoi(ptr+16);
-		 	}
-	  }
-//	  fprintf(stderr, "\n\natoi(ptr+16)=%d\nlen=%d\ndata_size=%d\n\n", atoi(ptr+16),strlen(buf)-((ptr_del-buf)/sizeof(char)+4),data_size); //отладка!!!
+		data_size = (ptr_del-buf)/sizeof(char)+4+atoi(ptr+16);
+	    }
+	}
+//	fprintf(stderr, "\n\natoi(ptr+16)=%d\nlen=%d\ndata_size=%d\n\n", atoi(ptr+16),strlen(buf)-((ptr_del-buf)/sizeof(char)+4),data_size); //отладка!!!
 
-		while((unsigned int)nsumbytes < sizeof(buf) && (unsigned int)nsumbytes < (unsigned int)data_size)
-		{
-			nbytes = recv(ns, buf+nsumbytes, sizeof(buf), 0);
-			nsumbytes += nbytes;
-		}
+	while((unsigned int)nsumbytes < sizeof(buf) && (unsigned int)nsumbytes < (unsigned int)data_size)
+	{
+		nbytes = recv(ns, buf+nsumbytes, sizeof(buf), 0);
+		nsumbytes += nbytes;
+	}
   }
-  
+
 //	fprintf(stderr, "\nrecv_buf = %s\n\n\n", buf); //отладка!!!
 	if(nsumbytes <= 0)
 	{
 		fprintf(stderr, "nsumbytes <= 0\n");
 		mysql_close(&mysql);      
 		closesocket(ns);
-#ifdef WIN32	  
+#ifdef WIN32
 	  ExitThread(60);
 #else
-    pthread_exit(NULL);
-#endif	  
+	  pthread_exit(NULL);
+#endif
 	}
 	if(strncmp(buf, "POST ", 5) == 0)
 	{
 	  ptr = get_head_value(buf, "POST /");
 	  //получаем название основной таблицы
 	  memset(main_table, 0, sizeof(main_table));
-	  for(i = 0; ptr[i] != ' '; ++i)
+	  for(i = 0; ptr[i] != ' ' && i < sizeof(main_table)-1; ++i)
 	  {
-		  main_table[i] = ptr[i];
+	    main_table[i] = ptr[i];
 	  }
 
 	  //задаём название основной таблицы как название таблицы для перехода
 	  memset(next_table, 0, sizeof(next_table));
-	  strcpy_s(next_table, sizeof(next_table), main_table);
+	  strcpy_s(next_table, strlen(main_table), main_table);
 
 	  //получаем длину передпнного сообщения
 	  ptr = get_head_value(buf, "Content-Length: ");
@@ -441,7 +390,7 @@ ProcessingThread(void *lpParams)
 		len = 0;
 	  else
 		len = atoi(ptr);
-	  
+
 	  //если сообщение не пустое - производим его разбор
 	  //менять порядок разбора строго не рекомендуется
 	  if(len > 0)
@@ -476,13 +425,13 @@ ProcessingThread(void *lpParams)
 			}
 		}
 
-	    memset(cmd, 0, sizeof(cmd));
+		memset(cmd, 0, sizeof(cmd));
 		if(get_some_value(ptr, "next_table_name", cmd)) //получаем имя таблицы для перехода
 		{
 			if(strlen(cmd) > 0)
 			{
 				memset(next_table, 0, sizeof(next_table));
-				strcpy_s(next_table, sizeof(next_table), cmd); //если была задана таблица для перехода, запоминаем её имя
+				strcpy_s(next_table, strlen(cmd), cmd); //если была задана таблица для перехода, запоминаем её имя
 			}
 		}
 
@@ -490,29 +439,30 @@ ProcessingThread(void *lpParams)
 		{
 			if(strlen(cmd) > 0 && strncmp(cmd, "yes", 3) == 0)
 			{
-				fdelrow = true; //задаём возможность удаления строк
+				fdelrow = TRUE; //задаём возможность удаления строк
 			}
 		}
 
-	    memset(cmd, 0, sizeof(cmd));
+		memset(cmd, 0, sizeof(cmd));
 		memset(command_list, 0, sizeof(command_list));
 		if(get_some_value(ptr, "command_list", cmd)) //получаем список команд
 		{
-			strcpy_s(command_list, sizeof(command_list), cmd);
+			strcpy_s(command_list, strlen(cmd), cmd);
 
 			if(strstr(command_list, "create_new_table") != NULL)
 			{
-				fnewtable = true;
+				fnewtable = TRUE;
 			}
 		}
 
 		len = strlen(ptr); //т.к. содержимое ptr может измениться
 		
+		memset(&id_value_data, 0, sizeof(id_value_data));
 		while(len > 0)
 		{
-	      len = get_id_value(ptr, &id_value_data); //функция определяет id изменяемого элемента, имя столбца и новое значение. 
-		                                           //возвращает оставшуюся длину сообщения.
-												   //заодно убирает %XX, переделывает кавычки, ищет таблицу для перехода.
+		  len = get_id_value(ptr, &id_value_data); //функция определяет id изменяемого элемента, имя столбца и новое значение.
+							   //возвращает оставшуюся длину сообщения.
+							   //заодно убирает %XX, переделывает кавычки, ищет таблицу для перехода.
 //		  fprintf(stderr, "len = %d\n", len);
 		  if(len < 0) continue;
 		  ptr = ptr + id_value_data.index;
@@ -522,22 +472,22 @@ ProcessingThread(void *lpParams)
 			  //проверяем, рабочий ли этот адрес
 			  fprintf(stderr, "checking...\n");
 			  memset(main_server, 0, sizeof(main_server));
-			  strncpy(main_server, id_value_data.value, strlen(id_value_data.value));
-			  
+			  strcpy_s(main_server, strlen(id_value_data.value), id_value_data.value);
+
 			  //создаём сокет
 			  if((check_s = socket(AF_INET, SOCK_STREAM, 0)) == -1)
 			  {
 				fprintf(stderr, "error: socket()\n");
 				mysql_close(&mysql);      
 				closesocket(ns);
-			    fprintf(stderr, "The check is failed\n");
-#ifdef WIN32	  
-			  ExitThread(1);
+				fprintf(stderr, "The check is failed\n");
+#ifdef WIN32
+				ExitThread(1);
 #else
-		    pthread_exit(NULL);
+				pthread_exit(NULL);
 #endif
 			  }
-			  
+
 			  memset(&clnt_addr, 0, sizeof(clnt_addr));
 			  clnt_addr.sin_family = AF_INET;
 			  clnt_addr.sin_addr.s_addr = INADDR_ANY;
@@ -562,13 +512,15 @@ ProcessingThread(void *lpParams)
 			  hp = gethostbyname(main_server);
 			  if(hp == NULL)
 			  {
-				  delete [] id_value_data.name;
-				  delete [] id_value_data.value;
+				  if(id_value_data.name != NULL)
+					free(id_value_data.name);
+				  if(id_value_data.value != NULL)
+					free(id_value_data.value);
 				  fprintf(stderr, "error: gethostbyname()\n");
-			      fprintf(stderr, "The check is failed\n");
+				  fprintf(stderr, "The check is failed\n");
 				  closesocket(ns);
 //				  ExitThread(1);
-//			    pthread_exit(NULL);
+//				  pthread_exit(NULL);
 				  break;
 			  }
 
@@ -586,8 +538,10 @@ ProcessingThread(void *lpParams)
 
 				  sprintf_s(cmd, sizeof(cmd), "UPDATE %s SET %s=\"%s\" WHERE id=%d", main_table, id_value_data.name, id_value_data.value, id_value_data.id);
 				  fprintf(stderr, "%s\n", cmd);
-				  delete [] id_value_data.name;
-				  delete [] id_value_data.value;
+				  if (id_value_data.name != NULL)
+					  free(id_value_data.name);
+				  if (id_value_data.value != NULL)
+					  free(id_value_data.value);
  				  if(mysql_query(&mysql, cmd) != 0)
 				  {
 					fprintf(stderr, "error mysql_query() : %s\n", mysql_error(&mysql));
@@ -595,8 +549,10 @@ ProcessingThread(void *lpParams)
 			  }
 			  else
 			  {
-				  delete [] id_value_data.name;
-				  delete [] id_value_data.value;
+				  if (id_value_data.name != NULL)
+					  free(id_value_data.name);
+				  if (id_value_data.value != NULL)
+					  free(id_value_data.value);
 			      fprintf(stderr, "The check is failed (connect())\n");
 			  }
 			  //удаляем сокет
@@ -604,11 +560,13 @@ ProcessingThread(void *lpParams)
 		  }
 		  else
 		  {
- 			  sprintf_s(cmd, sizeof(cmd), "UPDATE %s SET %s=\"%s\" WHERE id=%d", main_table, id_value_data.name, id_value_data.value, id_value_data.id);
+			  sprintf_s(cmd, sizeof(cmd), "UPDATE %s SET %s=\"%s\" WHERE id=%d", main_table, id_value_data.name, id_value_data.value, id_value_data.id);
 			  fprintf(stderr, "%s\n", cmd);
-			  delete [] id_value_data.name;
-			  delete [] id_value_data.value;
- 			  if(mysql_query(&mysql, cmd) != 0)
+			  if (id_value_data.name != NULL)
+				  free(id_value_data.name);
+			  if (id_value_data.value != NULL)
+				  free(id_value_data.value);
+			  if(mysql_query(&mysql, cmd) != 0)
 			  {
 				fprintf(stderr, "error mysql_query() : %s\n", mysql_error(&mysql));
 			  }
@@ -620,9 +578,9 @@ ProcessingThread(void *lpParams)
 
 	if(fnewtable) //получаем имя новой таблицы
 	{
-		memset(cmd, 0, MAX_BUFF_SIZE);
+		memset(cmd, 0, sizeof(cmd));
 		//здесь получаем название новой таблицы
-		sprintf_s(cmd, MAX_BUFF_SIZE, "SELECT new_tab_name FROM new_table_info");
+		sprintf_s(cmd, sizeof(cmd), "SELECT new_tab_name FROM new_table_info");
 		if(mysql_query(&mysql, cmd) != 0)
 		{
 			mysql_error_thread_exit(&mysql, &ns);
@@ -635,7 +593,7 @@ ProcessingThread(void *lpParams)
 		if( num_col != 0 && (row_col = mysql_fetch_row(res_col)) != NULL && row_col[0] != NULL)
 		{
 			memset(next_table, 0, sizeof(next_table));
-			strncpy(next_table, row_col[0], strlen(row_col[0]));
+			strcpy_s(next_table, strlen(row_col[0]), row_col[0]);
 		}
 		if(num_col > 0)
 		{
@@ -644,9 +602,9 @@ ProcessingThread(void *lpParams)
 	}
 
 	//заменяем основную таблицу на таблицу для перехода
-    memset(main_table, 0, sizeof(main_table));
-    strcpy_s(main_table, sizeof(main_table), next_table);
-	
+	memset(main_table, 0, sizeof(main_table));
+	strcpy_s(main_table, sizeof(main_table), next_table);
+
 	memset(cmd, 0, sizeof(cmd));
 	//здесь получаем описание сервера
 	sprintf_s(cmd, sizeof(cmd), "SELECT id,addr,default_index,col_width,col_width_min,addr_default FROM server_info");
@@ -670,30 +628,33 @@ ProcessingThread(void *lpParams)
 				error_thread_exit(&mysql, &ns, cmd);
 			}
 		}
-		area_width = atoi(row_srv[3]);
-		area_width_min = atoi(row_srv[4]);
+		//area_width = atoi(row_srv[3]);
+		//area_width_min = atoi(row_srv[4]);
 //		fprintf(stderr, "cols_num=%d, %d, %d,\n%s, %s\n", cols_num, area_width, area_width_min, row_srv[3], row_srv[4]);
 	}
 	else
 	{
 		sprintf_s(cmd, sizeof(cmd), "error database: wrong table 'server_info'");
-	    error_thread_exit(&mysql, &ns, cmd);
+		error_thread_exit(&mysql, &ns, cmd);
 	}
 	
 
 	if(strncmp(buf, "GET /favicon.ico", 16) == 0)
 	{
-	  delete [] id_value_data.name;
-	  delete [] id_value_data.value;
-#ifdef LINUX	  
+	  //if (id_value_data.name != NULL)
+		//free(id_value_data.name);
+	  //if (id_value_data.value != NULL)
+		//free(id_value_data.value);
+		mysql_close(&mysql);
+#ifdef LINUX
 	  shutdown(ns, SHUT_RDWR);
-#endif	  
+#endif
 	  closesocket(ns);
 #ifdef WIN32
 		ExitThread(100);
 #else
 		pthread_exit(NULL);
-#endif	  
+#endif
 	}
 
 	if(strncmp(buf, "GET /", 5) == 0)
@@ -702,7 +663,7 @@ ProcessingThread(void *lpParams)
 	  memset(main_table, 0, sizeof(main_table));
 	  if(ptr[0] == ' ')
 	  {
-	    strcpy_s(main_table, sizeof(main_table), row_srv[2]);
+	    strcpy_s(main_table, strlen(row_srv[2]), row_srv[2]);
 	  }
 	  else
 	  {
@@ -735,38 +696,38 @@ ORDER BY a.col_num", main_table);
 	}
 	if(num_col > 0)
 	{
-		memset(tab_col, NULL, sizeof(tab_col));
+		memset(tab_col, 0, sizeof(tab_col));
 		i = 0;
 		//получаем данные о столбцах и сохраняем всё в кэш
 		while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		{
-			tab_col[i] = new table_column;
+			tab_col[i] = malloc(sizeof(struct table_column));
 
 			//ключ
 			tab_col[i]->id = atoi(row_col[0]);
 
 			//имя столбца
-			tab_col[i]->name = new char[strlen(row_col[1])+1];
+			tab_col[i]->name = (char *) malloc(strlen(row_col[1])+1);
 			memset(tab_col[i]->name, 0, strlen(row_col[1])+1);
-			strcpy(tab_col[i]->name, row_col[1]);
+			strcpy_s(tab_col[i]->name, strlen(row_col[1])+1, row_col[1]);
 
 			//тип столбца
 			tab_col[i]->type = atoi(row_col[2]);
 
 			//код строки
-			tab_col[i]->html_code = new char[strlen(row_col[3])+1];
+			tab_col[i]->html_code = (char *) malloc(strlen(row_col[3])+1);
 			memset(tab_col[i]->html_code, 0, strlen(row_col[3])+1);
-			strcpy(tab_col[i]->html_code, row_col[3]);
+			strcpy_s(tab_col[i]->html_code, strlen(row_col[3])+1, row_col[3]);
 
 			//код заголовка столбца
-			tab_col[i]->html_hat = new char[strlen(row_col[4])+1];
+			tab_col[i]->html_hat = (char *) malloc(strlen(row_col[4])+1);
 			memset(tab_col[i]->html_hat, 0, strlen(row_col[4])+1);
-			strcpy(tab_col[i]->html_hat, row_col[4]);
+			strcpy_s(tab_col[i]->html_hat, strlen(row_col[4])+1, row_col[4]);
 
 			//заголовок столбца в таблице
-			tab_col[i]->col_hat = new char[strlen(row_col[5])+1];
+			tab_col[i]->col_hat = (char *) malloc(strlen(row_col[5])+1);
 			memset(tab_col[i]->col_hat, 0, strlen(row_col[5])+1);
-			strcpy(tab_col[i]->col_hat, row_col[5]);
+			strcpy_s(tab_col[i]->col_hat, strlen(row_col[5])+1, row_col[5]);
 
 			//ширина столбца в таблице
 			tab_col[i]->col_size = atoi(row_col[6]);
@@ -793,23 +754,23 @@ ORDER BY a.col_num", main_table);
 	{
 	    mysql_free_result(res_srv);
 	    mysql_free_result(res_col);
-		sprintf_s(head, sizeof(head), "error database: no such table '%s' in tab_columns", main_table);
+	    sprintf_s(head, sizeof(head), "error database: no such table '%s' in tab_columns", main_table);
 	    error_thread_exit(&mysql, &ns, head);
 	}
 	cols_num = i; //запоминаем количество столбцов в выводимой таблице
 
-    mysql_free_result(res_col); //можно, т.к. все данные уже в кэше
+	mysql_free_result(res_col); //можно, т.к. все данные уже в кэше
 
 	//определим ячейки (столбцы), требующие подготовки к выводу
 	for(i = 0; i < cols_num; ++i)
 	{
 		if(tab_col[i]->type == 3) //если это поле с выбором значений
 		{
-			fselects = true; //установим флаг загрузки значений выбора
+			fselects = TRUE; //установим флаг загрузки значений выбора
 		}
 		else if(tab_col[i]->type == 9) //если это поле с динамическим выбором значений
 		{
-			fdynamic = true; //установим флаг загрузки значений динамического выбора
+			fdynamic = TRUE; //установим флаг загрузки значений динамического выбора
 		}
 	}
 
@@ -854,13 +815,13 @@ WHERE b.tab_name='%s'", main_table);
 						//определяем длину поля со значениями выбора
 						len = strlen(row_tbl[1]);
 						//создаём новую структуру с выбором для текущего поля
-						tab_col[i]->selects = new select_values;
+						tab_col[i]->selects = malloc(sizeof(struct select_values));
 						//обнуляем созданную структуру
-						memset(tab_col[i]->selects, 0, sizeof(select_values));
+						memset(tab_col[i]->selects, 0, sizeof(struct select_values));
 						//воспользуемся буфером (для начала обнулим)
 						memset(buf, 0, sizeof(buf));
 						//отрицаем отсутствие разделителя
-						fnodelim = false;
+						fnodelim = FALSE;
 						//заполняем структуру значениями
 						for(j = 0, k = 0, l = 0, m = 0; j < len; ++j)
 						{
@@ -873,7 +834,7 @@ WHERE b.tab_name='%s'", main_table);
 										{
 											//если нету "::", создаём значение поля автоматически (по порядку, начиная с 0)
 											sprintf_s(buf, sizeof(buf), "%d", l);
-											fnodelim = true;
+											fnodelim = TRUE;
 										}
 										else if(row_tbl[1][j] != ':') //если текущий символ не ':', пополняем им буфер
 										{
@@ -886,13 +847,13 @@ WHERE b.tab_name='%s'", main_table);
 											continue;
 										}
 										//инициализируем значение выбора
-										tab_col[i]->selects->values[l] = new char[strlen(buf)+1];
+										tab_col[i]->selects->values[l] = (char *) malloc(strlen(buf)+1);
 										memset(tab_col[i]->selects->values[l], 0, strlen(buf)+1);
 										strcpy_s(tab_col[i]->selects->values[l], strlen(buf)+1, buf);
 										//очищаем буфер
 										memset(buf, 0, sizeof(buf));
 										//гарантируем присутствие строки для выбора
-										tab_col[i]->selects->selects[l] = new char[2];
+										tab_col[i]->selects->selects[l] = (char *) malloc(2);
 										memset(tab_col[i]->selects->selects[l], 0, 2);
 										if(fnodelim)
 											j--; //если нету разделителя, остаёмся на месте и не переходим по строке выбора
@@ -914,10 +875,10 @@ WHERE b.tab_name='%s'", main_table);
 
 										//удаляем прежнюю заглушку
 										if(tab_col[i]->selects->selects[l] != NULL)
-											delete [] tab_col[i]->selects->selects[l];
+											free(tab_col[i]->selects->selects[l]);
 
 										//инициализируем строку для выбора
-										tab_col[i]->selects->selects[l] = new char[strlen(buf)+1];
+										tab_col[i]->selects->selects[l] = (char *) malloc(strlen(buf)+1);
 										memset(tab_col[i]->selects->selects[l], 0, strlen(buf)+1);
 										strcpy_s(tab_col[i]->selects->selects[l], strlen(buf)+1, buf);
 										//очищаем буфер
@@ -1057,23 +1018,23 @@ WHERE b.tab_name='%s'", main_table);
 									{
 										if(tab_col[i]->dynamic == NULL)
 										{
-											tab_col[i]->dynamic = new select_values;
-											memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+											tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+											memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 										}
 										else
 										{
-											select_values *svlist;
+											struct select_values *svlist;
 											svlist = tab_col[i]->dynamic;
-											tab_col[i]->dynamic = new select_values;
-											memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+											tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+											memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 											tab_col[i]->dynamic->svnext = svlist;
 										}
 
 										//добавляем вариант 'NULL'
 										l = tab_col[i]->dynamic->count;
-										tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
+										tab_col[i]->dynamic->values[l] = (char *) malloc(strlen("NULL")+1);
 										strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
-										tab_col[i]->dynamic->selects[l] = new char[strlen("NULL")+1];
+										tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen("NULL")+1);
 										strcpy_s(tab_col[i]->dynamic->selects[l], strlen("NULL")+1, "NULL");
 										//присваиваем текущему выбору несуществующий индекс таблицы
 										tab_col[i]->dynamic->tab_index = 0;
@@ -1090,9 +1051,9 @@ WHERE b.tab_name='%s'", main_table);
 												continue;
 											}
 											l = tab_col[i]->dynamic->count;
-											tab_col[i]->dynamic->values[l] = new char[strlen(row_col[0])+1];
+											tab_col[i]->dynamic->values[l] = (char *) malloc(strlen(row_col[0])+1);
 											strcpy_s(tab_col[i]->dynamic->values[l], strlen(row_col[0])+1, row_col[0]);
-											tab_col[i]->dynamic->selects[l] = new char[strlen(row_col[0])+1];
+											tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen(row_col[0])+1);
 											strcpy_s(tab_col[i]->dynamic->selects[l], strlen(row_col[0])+1, row_col[0]);
 											//присваиваем текущему выбору индекс таблицы, столбцы которой и формируют выборку
 											tab_col[i]->dynamic->tab_index = atoi(row_dsc[1]);
@@ -1132,23 +1093,23 @@ WHERE b.tab_name='%s'", main_table);
 								{
 									if(tab_col[i]->dynamic == NULL)
 									{
-										tab_col[i]->dynamic = new select_values;
-										memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+										tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+										memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 									}
 									else
 									{
-										select_values *svlist;
+										struct select_values *svlist;
 										svlist = tab_col[i]->dynamic;
-										tab_col[i]->dynamic = new select_values;
-										memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+										tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+										memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 										tab_col[i]->dynamic->svnext = svlist;
 									}
 
 									//добавляем вариант 'NULL'
 									l = tab_col[i]->dynamic->count;
-									tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
+									tab_col[i]->dynamic->values[l] = (char *) malloc(strlen("NULL")+1);
 									strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
-									tab_col[i]->dynamic->selects[l] = new char[strlen("NULL")+1];
+									tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen("NULL")+1);
 									strcpy_s(tab_col[i]->dynamic->selects[l], strlen("NULL")+1, "NULL");
 									//присваиваем текущему выбору несуществующий индекс таблицы
 									tab_col[i]->dynamic->tab_index = 0;
@@ -1165,9 +1126,9 @@ WHERE b.tab_name='%s'", main_table);
 											continue;
 										}
 										l = tab_col[i]->dynamic->count;
-										tab_col[i]->dynamic->values[l] = new char[strlen(row_col[0])+1];
+										tab_col[i]->dynamic->values[l] = (char *) malloc(strlen(row_col[0])+1);
 										strcpy_s(tab_col[i]->dynamic->values[l], strlen(row_col[0])+1, row_col[0]);
-										tab_col[i]->dynamic->selects[l] = new char[strlen(row_col[0])+1];
+										tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen(row_col[0])+1);
 										strcpy_s(tab_col[i]->dynamic->selects[l], strlen(row_col[0])+1, row_col[0]);
 
 										num_col--;
@@ -1195,7 +1156,7 @@ ORDER BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 							{
 								//если ячейки с индексом и именем совпадают
 /*
-								sprintf_s(cmd, sizeof(cmd), "\
+sprintf_s(cmd, sizeof(cmd), "\
 SELECT %s,%s \
 FROM %s \
 GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2], row_tbl[2]);
@@ -1225,23 +1186,23 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 							{
 								if(tab_col[i]->dynamic == NULL)
 								{
-									tab_col[i]->dynamic = new select_values;
-									memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+									tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+									memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 								}
 								else
 								{
-									select_values *svlist;
+									struct select_values *svlist;
 									svlist = tab_col[i]->dynamic;
-									tab_col[i]->dynamic = new select_values;
-									memset(tab_col[i]->dynamic, 0, sizeof(select_values));
+									tab_col[i]->dynamic = malloc(sizeof(struct select_values));
+									memset(tab_col[i]->dynamic, 0, sizeof(struct select_values));
 									tab_col[i]->dynamic->svnext = svlist;
 								}
 
 								//добавляем вариант 'ПУСТО'
 								l = tab_col[i]->dynamic->count;
-								tab_col[i]->dynamic->values[l] = new char[strlen("NULL")+1];
+								tab_col[i]->dynamic->values[l] = (char *) malloc(strlen("NULL")+1);
 								strcpy_s(tab_col[i]->dynamic->values[l], strlen("NULL")+1, "NULL");
-								tab_col[i]->dynamic->selects[l] = new char[strlen(" ")+1];
+								tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen(" ")+1);
 								strcpy_s(tab_col[i]->dynamic->selects[l], strlen(" ")+1, " ");
 								//присваиваем текущему выбору несуществующий индекс таблицы
 								tab_col[i]->dynamic->tab_index = 0;
@@ -1258,9 +1219,9 @@ GROUP BY %s", row_tbl[2], row_tbl[3], row_tbl[1], row_tbl[2]);
 										continue;
 									}
 									l = tab_col[i]->dynamic->count;
-									tab_col[i]->dynamic->values[l] = new char[strlen(row_col[0])+1];
+									tab_col[i]->dynamic->values[l] = (char *) malloc(strlen(row_col[0])+1);
 									strcpy_s(tab_col[i]->dynamic->values[l], strlen(row_col[0])+1, row_col[0]);
-									tab_col[i]->dynamic->selects[l] = new char[strlen(row_col[1])+1];
+									tab_col[i]->dynamic->selects[l] = (char *) malloc(strlen(row_col[1])+1);
 									strcpy_s(tab_col[i]->dynamic->selects[l], strlen(row_col[1])+1, row_col[1]);
 
 									num_col--;
@@ -1325,17 +1286,17 @@ WHERE b.tab_name='%s'", main_table);
 		}
 		if(num_col > 0)
 		{
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf)-1, "<p align=center>"); //центруем
 		  while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		  {
 			if(row_col != NULL)
 			{
 				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //дополняем кнопки адресом сервера
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //добавляем кнопки открытия таблиц
+				strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd); //добавляем кнопки открытия таблиц
 			}
 		  }
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //центруем
-	//		  strcat_s(buf, sizeof(buf)-strlen(buf), "<br>"); //отделяем пустой строкой
+		  strcat_s(buf, sizeof(buf)-strlen(buf)-1, "</p>"); //центруем
+	//		  strcat_s(buf, sizeof(buf)-strlen(buf)-1, "<br>"); //отделяем пустой строкой
 		}
 
 		//вставляем кнопки несистемных таблиц
@@ -1356,38 +1317,37 @@ WHERE b.tab_name='%s'", main_table);
 		}
 		if(num_col > 0)
 		{
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "<p align=center>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf)-1, "<p align=center>"); //центруем
 		  while( (row_col = mysql_fetch_row(res_col)) != NULL)
 		  {
 			if(row_col != NULL)
 			{
 				sprintf_s(cmd, sizeof(cmd), row_col[0], row_srv[1]); //дополняем кнопки адресом сервера
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //добавляем кнопки открытия таблиц
+				strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd); //добавляем кнопки открытия таблиц
 			}
 		  }
-		  strcat_s(buf, sizeof(buf)-strlen(buf), "</p>"); //центруем
+		  strcat_s(buf, sizeof(buf)-strlen(buf)-1, "</p>"); //центруем
 		}
 
-		strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[2]); //добавили заголовок таблицы
+		strcat_s(buf, sizeof(buf)-strlen(buf)-1, row_tbl[2]); //добавили заголовок таблицы
 	}
 	else
 	{
 		//выход
 		FREE_DATA_OF_COLUMNS;
-//  	    mysql_free_result(res);
+//		mysql_free_result(res);
 		mysql_free_result(res_srv);
-//  	    mysql_free_result(res_col);
+//		mysql_free_result(res_col);
 		sprintf_s(head, sizeof(head), "error database: no such table '%s' in tab_info", main_table);
-        error_thread_exit(&mysql, &ns, head);
+		error_thread_exit(&mysql, &ns, head);
 	}
 
 	if(fdelrow)
 	{
 		if( (ptr_del = strstr(buf, "<input type=\"hidden\" form=\"frm\" id=\"delete_row\" name=\"delete_row_mode\" value=\"")) != NULL)
 		{
-			strncpy(ptr_del+78, "no ", 3);
+			strcpy_s(ptr_del+78, 4, "no ");
 		}
-
 	}
 
 //--------------------------------------------------------------------ВЫВОД ЗНАЧЕНИЙ ТАБЛИЦЫ---------------------------------------------
@@ -1395,25 +1355,24 @@ WHERE b.tab_name='%s'", main_table);
 	switch(atoi(row_tbl[9]))
 	{
 		case 0: //вывод горизонтальной таблицы
-			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //начало строки
-			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>№</h4></td>\n");
+			strcat_s(buf, sizeof(buf)-strlen(buf)-1, row_tbl[4]); //начало строки
+			strcat_s(buf, sizeof(buf)-strlen(buf)-1, "<td align=center><h4>#</h4></td>\n");
 			for(j = 1; j < cols_num; ++j) //j=1 - не показываем первый столбец (ключ)
 			{
 			  //генерируем заголовок из кэша
 			  memset(cmd, 0, sizeof(cmd));
 			  sprintf_s(cmd, sizeof(cmd), tab_col[j]->html_hat, tab_col[j]->col_hat);
 			  //вставляем заголовок в таблицу
-			  strcat_s(buf, sizeof(buf)-strlen(buf), cmd);
+			  strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd);
 			}
 
 			if(fdelrow) //если задан флаг удаления столбцов
 			{
 				sprintf_s(cmd, sizeof(cmd), "<td align=center>-</td>");
-				strcat_s(buf, sizeof(buf)-strlen(buf), cmd); //присоединяем к остальным столбцам
+				strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd); //присоединяем к остальным столбцам
 			}
 
-			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //конец строки
-
+			strcat_s(buf, sizeof(buf)-strlen(buf)-1, row_tbl[5]); //конец строки
 
 			//здесь получаем данные из таблицы main_table
 			//генерируем запрос на основе полученного кэша (который определяет порядок столбцов)
@@ -1424,10 +1383,10 @@ WHERE b.tab_name='%s'", main_table);
 			strcpy_s(cmd, sizeof(cmd), "SELECT ");
 			for(i = 0; i < cols_num; ++i)
 			{
-				strcat(cmd, tab_col[i]->name);
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, tab_col[i]->name);
 
 				if(i != cols_num-1)
-					strcat(cmd, ",");
+					strcat_s(cmd, sizeof(cmd)-1, ",");
 
 				switch(tab_col[i]->sort)
 				{
@@ -1436,32 +1395,32 @@ WHERE b.tab_name='%s'", main_table);
 					case 1:
 					case 2:
 						if(strlen(head) > 10)  //если больше чем длина строчки: " ORDER BY ", т.е. если перечисление уже было начато
-							strcat_s(head, sizeof(head)-strlen(head), ",");
-						strcat_s(head, sizeof(head)-strlen(head), tab_col[i]->name);
+							strcat_s(head, sizeof(head)-strlen(head)-1, ",");
+						strcat_s(head, sizeof(head)-strlen(head)-1, tab_col[i]->name);
 						if(tab_col[i]->sort == 2) //если нужна сортировка в обратном порядке
-							strcat_s(head, sizeof(head)-strlen(head), " DESC");
+							strcat_s(head, sizeof(head)-strlen(head)-1, " DESC");
 						break;
 				}
 			}
-			strcat(cmd, " FROM ");
-			strcat(cmd, main_table); //откуда
+			strcat_s(cmd, sizeof(cmd)-1, " FROM ");
+			strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, main_table); //откуда
 			if(strlen(head) > 10) //если больше чем длина строчки: " ORDER BY ", т.е. если есть сортировка
-			  strcat(cmd, head); //сортировка
+			  strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, head); //сортировка
 			if(mysql_query(&mysql, cmd) != 0)
 			{
 			  num = 0;
 			  mysql_free_result(res_srv);
 			  mysql_free_result(res_col);
- 			  mysql_error_thread_exit(&mysql, &ns);
+			  mysql_error_thread_exit(&mysql, &ns);
 			}
 			else
 			{
 			  res = mysql_store_result(&mysql);
 			  num = mysql_affected_rows(&mysql);
 			}
-			  
+
 			i = 1; //номер строки (!)
-			ffirst = true;
+			ffirst = TRUE;
 			if(num > 0)
 			{
 			  while(num > 0)
@@ -1474,19 +1433,20 @@ WHERE b.tab_name='%s'", main_table);
 				}
 
 				memset(cmd, 0, sizeof(cmd));
+				//TODO: enum
 				//формируем строку таблицы
 				//типы: 0-нередактируемый
-				//      1-стандартная редактируемая строка
-				//			3-выбор
-				//			4-картинка
-				//			5-кнопка
-				//			7-да/нет
-				//			8-фиксатор
-				//			9-выборка
-				//			10-пароль
-				//			11-стиль
-				//      12-поле
-				//			13-замок
+				//	1-стандартная редактируемая строка
+				//	3-выбор
+				//	4-картинка
+				//	5-кнопка
+				//	7-да/нет
+				//	8-фиксатор
+				//	9-выборка
+				//	10-пароль
+				//	11-стиль
+				//	12-поле
+				//	13-замок
 				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], i); //начало строки и первый столбец (номер строки)
 
 				max = 0;
@@ -1531,12 +1491,16 @@ WHERE b.tab_name='%s'", main_table);
 						case 12: //поле
 							if(row[j] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
-																					 tab_col[j]->name,
+#ifndef __LP64__
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%u size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%lu size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#endif
+			       tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
@@ -1544,8 +1508,12 @@ WHERE b.tab_name='%s'", main_table);
 							}
 							else
 							{
-								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
-																					 tab_col[j]->name,
+#ifndef __LP64__
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%u size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%u size=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#endif
+			       tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
@@ -1559,12 +1527,16 @@ WHERE b.tab_name='%s'", main_table);
 						case 13: //замок
 							if(row[j] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
-																					 tab_col[j]->name,
+#ifndef __LP64__
+							sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d size=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
+#else
+							sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%ld size=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
+#endif
+			       tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
@@ -1592,7 +1564,7 @@ WHERE b.tab_name='%s'", main_table);
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 (max>0)?max:1,
-																					 (strlen(tab_col[j]->col_hat)>(unsigned int)(tab_col[j]->col_size))?(strlen(tab_col[j]->col_hat)):tab_col[j]->col_size,
+																					 (int)(strlen(tab_col[j]->col_hat)>(unsigned int)(tab_col[j]->col_size))?(strlen(tab_col[j]->col_hat)):tab_col[j]->col_size,
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 make_lt_gt(row[j]));
@@ -1666,11 +1638,11 @@ WHERE b.tab_name='%s'", main_table);
 								for(m = 0; m < tab_col[j]->selects->count; ++m)
 								{
 									if(strcmp(row[j], tab_col[j]->selects->values[m]) == 0)
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\" selected>%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\" selected>%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
 									else
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\">%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\">%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
 								}
-								strcat_s(head, sizeof(head)-strlen(head), "</select></td>");
+								strcat_s(head, sizeof(head)-strlen(head)-1, "</select></td>");
 							}
 							else
 							{
@@ -1750,7 +1722,7 @@ WHERE b.tab_name='%s'", main_table);
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 (max>0)?max:1,
-																					 (strlen(tab_col[j]->col_hat)>(unsigned int)(tab_col[j]->col_size))?(strlen(tab_col[j]->col_hat)):tab_col[j]->col_size,
+																					 (int)(strlen(tab_col[j]->col_hat)>(unsigned int)(tab_col[j]->col_size))?(strlen(tab_col[j]->col_hat)):tab_col[j]->col_size,
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 "");
@@ -1760,7 +1732,7 @@ WHERE b.tab_name='%s'", main_table);
 							if(row[j] != NULL && tab_col[j]->dynamic != NULL)
 							{
 								char formatted_select[10240];
-								select_values *svlist;
+								struct select_values *svlist;
 
 								svlist = tab_col[j]->dynamic;
 								if(tab_col[j]->desc)
@@ -1790,11 +1762,11 @@ WHERE b.tab_name='%s'", main_table);
 								for(m = 0; m < svlist->count; ++m)
 								{
 									if(strcmp(row[j], svlist->values[m]) == 0)
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\" selected>%s</option>", svlist->values[m], svlist->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\" selected>%s</option>", svlist->values[m], svlist->selects[m]);
 									else
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\">%s</option>", svlist->values[m], svlist->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\">%s</option>", svlist->values[m], svlist->selects[m]);
 								}
-								strcat_s(head, sizeof(head)-strlen(head), "</select></td>");
+								strcat_s(head, sizeof(head)-strlen(head)-1, "</select></td>");
 							}
 							else
 							{
@@ -1804,16 +1776,20 @@ WHERE b.tab_name='%s'", main_table);
 						case 10: //пароль
 							if(row[j] != NULL)
 							{
+#ifndef __LP64__
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>",
-																					 tab_col[j]->name,
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%ld cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>",
+#endif
+			       tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[j])/tab_col[j]->col_size>3)?(strlen(row[j])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 strlen(row[j])>0?"---XpeH---":"");
+																					 strlen(row[j])>0?"---XP---":"");
 							}
 							else
 							{
@@ -1838,16 +1814,16 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 					}
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, head); //присоединяем к остальным столбцам
 				}
 
 				if(fdelrow) //если задан флаг удаления столбцов
 				{
 					sprintf_s(head, sizeof(head), "<td align=center><input type=\"button\" form=\"mega_form\" onClick=\"myreqins('tab_id_%d')\" value=\"-\" /><input type='hidden' form='frm' id='tab_id_%d' name='make_some_request' value='DELETE FROM %s WHERE id=%d'></td>", atoi(row[0]), atoi(row[0]), main_table, atoi(row[0]));
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, head); //присоединяем к остальным столбцам
 				}
 
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //конец строки
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, row_tbl[5]); //конец строки
 
 				if((strlen(cmd)+strlen(buf)) > sizeof(buf))
 				{
@@ -1856,22 +1832,22 @@ WHERE b.tab_name='%s'", main_table);
 						//отправляем первую порцию ("[заголовок]\r\n\r\n[размер (hex)]\r\n[buf]")
 						memset(head, 0, sizeof(head));
 						sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nServer: List/0.1.0\r\nReference: Win7\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\n");
-						strcat_s(head, sizeof(head)-strlen(head), "Connection: keep-alive\r\n\r\n");
-						send_data = new char[strlen(buf)+strlen(head)+16];
+						strcat_s(head, sizeof(head)-strlen(head)-1, "Connection: keep-alive\r\n\r\n");
+						send_data = (char *) malloc(strlen(buf)+strlen(head)+16);
 						memset(send_data, 0, strlen(buf)+strlen(head)+16);
-						sprintf_s(send_data, strlen(buf)+strlen(head)+15, "%s%x\r\n%s\r\n", head, strlen(buf), buf);
-						ffirst = false;
+						sprintf_s(send_data, strlen(buf)+strlen(head)+15, "%s%x\r\n%s\r\n", head, (unsigned int)strlen(buf), buf);
+						ffirst = FALSE;
 					}
 					else
 					{
 						//отправляем следующую порцию ("[размер (hex)]\r\n[buf]")
-						send_data = new char[strlen(buf)+16];
+						send_data = (char *) malloc(strlen(buf)+16);
 						memset(send_data, 0, strlen(buf)+16);
-						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", strlen(buf), buf);
+						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", (unsigned int)strlen(buf), buf);
 					}
 
 					memset(buf, 0, sizeof(buf)); //освобождаем буфер
-					strcpy(buf, cmd); //вставляем новый результат в освободившийся буфер
+					strcpy_s(buf, sizeof(buf), cmd); //вставляем новый результат в освободившийся буфер
 
 					//требуется замена функции отправки с целью уменьшения (усреднения) минимального размера
 					//отправляемых за один раз данных (отправлять по частям, которые не зависят от размера буфера)
@@ -1882,11 +1858,11 @@ WHERE b.tab_name='%s'", main_table);
 						nbytes = send(ns, send_data+nbytes_sent, size_to_send-nbytes_sent, 0);
 						nbytes_sent += nbytes;
 					}
-					delete [] send_data;
+					free(send_data);
 				}
 				else
 				{
-					strcat(buf, cmd);
+					strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd);
 				}
 				num--;
 				i++;
@@ -1894,14 +1870,14 @@ WHERE b.tab_name='%s'", main_table);
 			}
 			break;
 		case 1: //вывод вертикальной таблицы
-//удалить			strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[4]); //начало строки
-//удалить			strcat_s(buf, sizeof(buf)-strlen(buf), "<td align=center><h4>№</h4></td>\n");
+//удалить			strcat_s(buf, sizeof(buf)-strlen(buf)-1, row_tbl[4]); //начало строки
+//удалить			strcat_s(buf, sizeof(buf)-strlen(buf)-1, "<td align=center><h4>#</h4></td>\n");
 
-			ffirst = true; //ещё ни одной отправки не было (для вставки заголовка)
+			ffirst = TRUE; //ещё ни одной отправки не было (для вставки заголовка)
 			index_row = 1; //номер текущей строки
 			for(j = 1; j < cols_num; ++j) //j=1 - не показываем первый столбец (ключ)
 			{
-//удалить			  strcat_s(buf, sizeof(buf)-strlen(buf), row_tbl[5]); //конец строки
+//удалить			  strcat_s(buf, sizeof(buf)-strlen(buf)-1, row_tbl[5]); //конец строки
 //				sprintf_s(cmd, sizeof(cmd), "%s<td align=center>%d</td>\n", row_tbl[4], index_row); //начало строки
 				strcpy_s(cmd, sizeof(cmd), row_tbl[4]); //начало строки
 
@@ -1918,13 +1894,13 @@ WHERE b.tab_name='%s'", main_table);
 					{
 						if(strlen(head) > 0)
 						{
-							strcat_s(head, sizeof(head)-strlen(head), ",");
+							strcat_s(head, sizeof(head)-strlen(head)-1, ",");
 						}
 						else
 						{
-							strcat_s(head, sizeof(head)-strlen(head), " ORDER BY ");
+							strcat_s(head, sizeof(head)-strlen(head)-1, " ORDER BY ");
 						}
-						strcat_s(head, sizeof(head)-strlen(head), tab_col[i]->name);
+						strcat_s(head, sizeof(head)-strlen(head)-1, tab_col[i]->name);
 					}
 				}
 				if(mysql_query(&mysql, head) != 0)
@@ -1943,7 +1919,7 @@ WHERE b.tab_name='%s'", main_table);
 				//вывод имени столбца
 				memset(head, 0, sizeof(head));
 				sprintf_s(head, sizeof(head), tab_col[index_row]->html_hat, tab_col[index_row]->col_hat); //генерируем заголовок из кэша
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //вставляем заголовок в таблицу
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, head); //вставляем заголовок в таблицу
 
 				if(num > 0)
 				{
@@ -1958,18 +1934,18 @@ WHERE b.tab_name='%s'", main_table);
 
 					//формируем строку таблицы
 					//типы: 0-нередактируемый
-					//		1-стандартная редактируемая строка
-					//		2-галочка
-					//		3-выбор
-					//		4-картинка
-					//    5-как есть (часть странички, например кнопка)
-					//		7-да/нет
-					//		8-фиксатор
-					//		9-выборка
-					//		10-пароль
-					//    11-стиль
-					//    12-поле
-					//		13-замок
+					//	1-стандартная редактируемая строка
+					//	2-галочка
+					//	3-выбор
+					//	4-картинка
+					//	5-как есть (часть странички, например кнопка)
+					//	7-да/нет
+					//	8-фиксатор
+					//	9-выборка
+					//	10-пароль
+					//	11-стиль
+					//	12-поле
+					//	13-замок
 					switch(tab_col[j]->type)
 					{
 						case 0: //нередактируемый
@@ -1998,12 +1974,16 @@ WHERE b.tab_name='%s'", main_table);
 						case 12: //поле
 							if(row[1] != NULL)
 							{
+#ifndef __LP64__
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d width=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%ld width=%d onChange=\"myreq('%s_%d')\" type='text' value='%s'></td>",
+#endif
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
@@ -2026,12 +2006,16 @@ WHERE b.tab_name='%s'", main_table);
 						case 13: //замок
 							if(row[1] != NULL)
 							{
+#ifndef __LP64__
 								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d width=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%ld width=%d onChange=\"myreq('%s_%d')\" type='text' disabled='disabled' value='%s'></td>",
+#endif
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
@@ -2133,18 +2117,18 @@ WHERE b.tab_name='%s'", main_table);
 								for(m = 0; m < tab_col[j]->selects->count; ++m)
 								{
 									if(strcmp(row[1], tab_col[j]->selects->values[m]) == 0)
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\" selected>%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\" selected>%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
 									else
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\">%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\">%s</option>", tab_col[j]->selects->values[m], tab_col[j]->selects->selects[m]);
 								}
-								strcat_s(head, sizeof(head)-strlen(head), "</select></td>");
+								strcat_s(head, sizeof(head)-strlen(head)-1, "</select></td>");
 							}
 							else
 							{
 								sprintf_s(head, sizeof(head), "<td width=\"%d\"></td>\n",tab_col[j]->col_size);
 							}
 							break;
-						case 4: //тут пока заглушка..
+						case 4: //картинка (тут пока заглушка..)
 							if(row[1] != NULL)
 							{
 								sprintf_s(head, sizeof(head), "<td width=\"%d\">%s</td>\n", tab_col[j]->col_size,//ширина
@@ -2226,7 +2210,7 @@ WHERE b.tab_name='%s'", main_table);
 							if(row[1] != NULL && tab_col[j]->dynamic != NULL)
 							{
 								char formatted_select[10240];
-								select_values *svlist;
+								struct select_values *svlist;
 
 								svlist = tab_col[j]->dynamic;
 								//if(tab_col[j]->desc)
@@ -2255,11 +2239,11 @@ WHERE b.tab_name='%s'", main_table);
 								for(m = 0; m < svlist->count; ++m)
 								{
 									if(strcmp(row[1], svlist->values[m]) == 0)
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\" selected>%s</option>", svlist->values[m], svlist->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\" selected>%s</option>", svlist->values[m], svlist->selects[m]);
 									else
-										sprintf_s(head+strlen(head), sizeof(head)-strlen(head), "<option value=\"%s\">%s</option>", svlist->values[m], svlist->selects[m]);
+										sprintf_s(head+strlen(head), sizeof(head)-strlen(head)-1, "<option value=\"%s\">%s</option>", svlist->values[m], svlist->selects[m]);
 								}
-								strcat_s(head, sizeof(head)-strlen(head), "</select></td>");
+								strcat_s(head, sizeof(head)-strlen(head)-1, "</select></td>");
 							}
 							else
 							{
@@ -2269,15 +2253,20 @@ WHERE b.tab_name='%s'", main_table);
 						case 10: //пароль
 							if(row[1] != NULL)
 							{
-								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>", tab_col[j]->name,
+#ifndef __LP64__
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%d cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>",
+#else
+								sprintf_s(head, sizeof(head), "<td><input form='frm' id='%s_%d' name='%s[%d]' rows=%ld cols=%d onChange=\"myreq('%s_%d')\" type='password' value='%s'></td>",
+#endif
+			       tab_col[j]->name,
 																					 atoi(row[0]),
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 (strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
+																					 (int)(strlen(row[1])/tab_col[j]->col_size>3)?(strlen(row[1])/tab_col[j]->col_size)+2:3, //высота
 																					 tab_col[j]->col_size,//15, //ширина
 																					 tab_col[j]->name,
 																					 atoi(row[0]),
-																					 strlen(row[1])>0?"---XpeH---":"");
+																					 strlen(row[1])>0?"---XP---":"");
 							}
 							else
 							{
@@ -2302,7 +2291,7 @@ WHERE b.tab_name='%s'", main_table);
 								sprintf_s(head, sizeof(head), "<td></td>\n");
 							}
 					}
-					strcat_s(cmd, sizeof(cmd)-strlen(cmd), head); //присоединяем к остальным столбцам
+					strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, head); //присоединяем к остальным столбцам
 					num--;
 				  }
 				}
@@ -2311,7 +2300,7 @@ WHERE b.tab_name='%s'", main_table);
 //					break; //не выводить заголовки пустых таблиц
 				}
 
-				strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[5]); //конец строки
+				strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, row_tbl[5]); //конец строки
 
 				if((strlen(cmd)+strlen(buf)) > sizeof(buf))
 				{
@@ -2320,22 +2309,22 @@ WHERE b.tab_name='%s'", main_table);
 						//отправляем первую порцию ("[заголовок]\r\n\r\n[размер (hex)]\r\n[buf]")
 						memset(head, 0, sizeof(head));
 						sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nServer: List/0.1.0\r\nReference: Win7\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\n");
-						strcat_s(head, sizeof(head)-strlen(head), "Connection: keep-alive\r\n\r\n");
-						send_data = new char[strlen(buf)+strlen(head)+16];
+						strcat_s(head, sizeof(head)-strlen(head)-1, "Connection: keep-alive\r\n\r\n");
+						send_data = (char *) malloc(strlen(buf)+strlen(head)+16);
 						memset(send_data, 0, strlen(buf)+strlen(head)+16);
-						sprintf_s(send_data, strlen(buf)+strlen(head)+15, "%s%x\r\n%s\r\n", head, strlen(buf), buf);
-						ffirst = false;
+						sprintf_s(send_data, strlen(buf)+strlen(head)+15, "%s%x\r\n%s\r\n", head, (unsigned int)strlen(buf), buf);
+						ffirst = FALSE;
 					}
 					else
 					{
 						//отправляем следующую порцию ("[размер (hex)]\r\n[buf]")
-						send_data = new char[strlen(buf)+16];
+						send_data = (char *) malloc(strlen(buf)+16);
 						memset(send_data, 0, strlen(buf)+16);
-						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", strlen(buf), buf);
+						sprintf_s(send_data, strlen(buf)+15, "%x\r\n%s\r\n", (unsigned int)strlen(buf), buf);
 					}
 
 					memset(buf, 0, sizeof(buf)); //освобождаем буфер
-					strcpy(buf, cmd); //вставляем новый результат в освободившийся буфер
+					strcpy_s(buf, sizeof(buf), cmd); //вставляем новый результат в освободившийся буфер
 
 					//требуется замена функции отправки с целью уменьшения (усреднения) минимального размера
 					//отправляемых за один раз данных (отправлять по частям, которые не зависят от размера буфера)
@@ -2346,11 +2335,11 @@ WHERE b.tab_name='%s'", main_table);
 						nbytes = send(ns, send_data+nbytes_sent, size_to_send-nbytes_sent, 0);
 						nbytes_sent += nbytes;
 					}
-					delete [] send_data;
+					free(send_data);
 				}
 				else
 				{
-					strcat(buf, cmd);
+					strcat_s(buf, sizeof(buf)-strlen(buf)-1, cmd);
 				}
 				index_row++;
 			}
@@ -2360,8 +2349,8 @@ WHERE b.tab_name='%s'", main_table);
 //--------------------------------------------------------------------ЗАВЕРШЕНИЕ ТАБЛИЦЫ---------------------------------------------
 
 	strcpy_s(cmd, sizeof(cmd), row_tbl[3]); //конец таблицы
-	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[6]); //кнопки
-	strcat_s(cmd, sizeof(cmd)-strlen(cmd), row_tbl[1]); //конец файла
+	strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, row_tbl[6]); //кнопки
+	strcat_s(cmd, sizeof(cmd)-strlen(cmd)-1, row_tbl[1]); //конец файла
 
 	if(ffirst)
 	{
@@ -2373,10 +2362,10 @@ WHERE b.tab_name='%s'", main_table);
 	  memset(head, 0, sizeof(head));
 	}
 
-	send_data = new char[strlen(buf)+strlen(cmd)+strlen(head)+16];
+	send_data = (char *) malloc(strlen(buf)+strlen(cmd)+strlen(head)+16);
 	memset(send_data, 0, strlen(buf)+strlen(cmd)+strlen(head)+16);
-	sprintf_s(send_data, strlen(buf)+15+strlen(cmd)+strlen(head), "%s%x\r\n%s%s\r\n0\r\n\r\n", head, strlen(buf)+strlen(cmd), buf, cmd);
-	//	fprintf(stderr, "%s\n", send_data); //отладка
+	sprintf_s(send_data, strlen(buf)+15+strlen(cmd)+strlen(head), "%s%x\r\n%s%s\r\n0\r\n\r\n", head, (unsigned int)(strlen(buf)+strlen(cmd)), buf, cmd);
+	//fprintf(stderr, "%s\n", send_data); //отладка
 	size_to_send = strlen(send_data);
 	nbytes_sent = 0;
 	while(nbytes_sent < size_to_send)
@@ -2384,7 +2373,7 @@ WHERE b.tab_name='%s'", main_table);
 		nbytes = send(ns, send_data+nbytes_sent, size_to_send-nbytes_sent, 0);
 		nbytes_sent += nbytes;
 	}
-	delete [] send_data;
+	free(send_data);
 
 	Sleep(500);
 	mysql_free_result(res);
@@ -2398,32 +2387,32 @@ WHERE b.tab_name='%s'", main_table);
 #endif
 	closesocket(ns);
 #ifdef WIN32
-  ExitThread(0);
+	ExitThread(0);
 #else
-  pthread_exit(NULL);
+	pthread_exit(NULL);
 #endif
 }
 
 void mysql_error_thread_exit(MYSQL * const mysql, SOCKET * const ns)
 {
 	char cmd[MAX_CMD_SIZE];
-	char head[MAX_HEAD_SIZE];
+	char head[MAX_HEAD_SIZE+MAX_CMD_SIZE+1];
 
 	sprintf_s(cmd, sizeof(cmd), "error mysql_query() : %s", mysql_error(mysql));
 	fprintf(stderr, "%s\n", cmd);
 	//выход (либо сообщение об ошибке)
-	sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", strlen(cmd), cmd);
+	sprintf_s(head, sizeof(head)-1000, "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", (unsigned int)strlen(cmd), cmd);
 	send(*ns, head, strlen(head), 0);
 	Sleep(500);
 #ifdef LINUX
-  shutdown(*ns, SHUT_RDWR);
+	shutdown(*ns, SHUT_RDWR);
 #endif
 	closesocket(*ns);
 	mysql_close(mysql);
 #ifdef WIN32
-	  ExitThread(10);
+	ExitThread(10);
 #else
-    pthread_exit(NULL);
+	pthread_exit(NULL);
 #endif
 }
 
@@ -2433,18 +2422,18 @@ void error_thread_exit(MYSQL * const mysql, SOCKET * const ns, char const * cons
 
 	fprintf(stderr, "%s\n", err_text);
 	//выход (либо сообщение об ошибке)
-	sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", strlen(err_text), err_text);
+	sprintf_s(head, sizeof(head), "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=windows-1251\r\nTransfer-Encoding: chunked\r\nConnection: close\r\n\r\n%x\r\n%s\r\n0\r\n\r\n", (unsigned int)strlen(err_text), err_text);
 	send(*ns, head, strlen(head), 0);
 	Sleep(500);
 #ifdef LINUX
-  shutdown(*ns, SHUT_RDWR);
+	shutdown(*ns, SHUT_RDWR);
 #endif
 	closesocket(*ns);
 	mysql_close(mysql);
 #ifdef WIN32
-	  ExitThread(10);
+	ExitThread(10);
 #else
-    pthread_exit(NULL);
+	pthread_exit(NULL);
 #endif
 }
 
@@ -2474,14 +2463,14 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 	char ch[3];
 	int val;
 
-    if(name == NULL)
-		return 0;
+	if(name == NULL)
+	    return 0;
 
-    if(value == NULL)
-		return 0;
+	if(value == NULL)
+	    return 0;
 
 	len = 0;
-    pindex = ptr;
+	pindex = ptr;
 	while(pindex != NULL)
 	{
 		pindex = strstr(pindex, name);
@@ -2514,7 +2503,7 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 			main_len = strlen(pindex); //запомним длину строчки 'name'
 			index = i;
 			pindex_start = pindex + strlen(name) + 1; //устанавливаем позицию начала значения
-			buf = new char[index*2+1]; //этого должно хватить с лихвой
+			buf = (char *) malloc(index*2+1); //этого должно хватить с лихвой
 			memset(buf, 0, index*2+1);
 
 			//убираем %XX
@@ -2529,7 +2518,7 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 					ch[0] = pindex_start[i+1];
 					ch[1] = pindex_start[i+2];
 					ch[2] = '\n';
-					sscanf(ch, "%X", &val);
+					sscanf_s(ch, "%X", &val, sizeof(ch));
 					buf[j] = (char)val;
 					i++;
 					i++;
@@ -2545,7 +2534,7 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 
 			strcpy_s(value, MAX_HEAD_SIZE, buf);
 			fprintf(stderr, "buf: %s\n", buf);
-			delete [] buf;
+			free(buf);
 			for(i = 0;;++i) //затираем эту запись
 			{
 				pindex[i] = pindex[main_len+i+1];
@@ -2564,7 +2553,7 @@ int get_some_value(char * const ptr, char const * const name, char * const value
 	return len;
 }
 
-int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
+int get_id_value(char * const ptr, struct id_value_data_struct * const id_value_data)
 {
 	int len;
 	int i, j, index;
@@ -2595,7 +2584,7 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 	len = 0;
 
 	j = strlen(ptr);
-    //находим стык переданных значений
+	//находим стык переданных значений
 	for(i = 0; i < j; ++i)
 	{
 		if(ptr[i] == '+')
@@ -2612,10 +2601,10 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 		}
 	}
 	index = i; //запоминаем позицию
-	buf = new char[index*2+1]; //этого должно хватить с лихвой
+	buf = (char *) malloc(index*2+1); //этого должно хватить с лихвой
 	memset(buf, 0, index*2+1);
 	//убираем %XX
-  for(i = 0, j = 0; i < index; ++i, ++j)
+	for(i = 0, j = 0; i < index; ++i, ++j)
 	{
 		if(ptr[i] != '%')
 		{
@@ -2626,7 +2615,7 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 			ch[0] = ptr[i+1];
 			ch[1] = ptr[i+2];
 			ch[2] = '\n';
-			sscanf(ch, "%X", &val);
+			sscanf_s(ch, "%X", &val, sizeof(ch));
 			buf[j] = (char)val;
 			i++;
 			i++;
@@ -2649,23 +2638,23 @@ int get_id_value(char * const ptr, id_value_data_struct * const id_value_data)
 		return -1;
 	}
 	pindex[0] = '\0';
-	id_value_data->name = new char[strlen(buf)+1];
+	id_value_data->name = (char *) malloc(strlen(buf)+1);
 	memset(id_value_data->name, 0, strlen(buf)+1);
-	strcpy(id_value_data->name, buf); //копируем имя столбца
+	strcpy_s(id_value_data->name, strlen(buf) + 1, buf); //копируем имя столбца
 	id_value_data->id = atoi(pindex+1); //определяем id записи
 	pindex = strstr(pindex+1, "="); //находим начало значения
 	if(pindex == NULL)
 	{
-		delete [] id_value_data->name;
+		free(id_value_data->name);
 		fprintf(stderr, "error: can not find '='\n");
 		return -1;
 	}
-	id_value_data->value = new char[strlen(pindex+1)+1];
+	id_value_data->value = (char *) malloc(strlen(pindex+1)+1);
 	memset(id_value_data->value, 0, strlen(pindex+1)+1);
-	strcpy(id_value_data->value, pindex+1);
+	strcpy_s(id_value_data->value, strlen(pindex + 1) + 1, pindex+1);
 //	fprintf(stderr, "\n%d, %s, %s\n", id_value_data->id, id_value_data->name, id_value_data->value);
 
-	delete [] buf;
+	free(buf);
 	return len;
 }
 
@@ -2674,21 +2663,21 @@ void run_commands(char * const cmd_list, MYSQL * const pmysql, SOCKET * const ns
 	char *ptr;
 
 	if(cmd_list == NULL)
-		return;
+	    return;
 	if(strlen(cmd_list) == 0)
-		return;
+	    return;
 	if(pmysql == NULL)
-		return;
+	    return;
 
-	ptr = strtok(cmd_list, ",");
+	ptr = strtok_s(cmd_list, ",", NULL);
 	while(ptr != NULL)
 	{
-		if(strncmp(ptr, "create_new_table", strlen(ptr)) == 0) //если присутствует команда 'создать новую таблицу'
-		{
-			create_new_table(pmysql, ns);
-		}
+	    if(strncmp(ptr, "create_new_table", strlen(ptr)) == 0) //если присутствует команда 'создать новую таблицу'
+	    {
+		create_new_table(pmysql, ns);
+	    }
 
-		ptr = strtok(NULL, ",");
+	    ptr = strtok_s(NULL, ",", NULL);
 	}
 }
 
@@ -2910,11 +2899,11 @@ void cp_to_utf8(char *out_text, const char *str, int from_cp, size_t size)
 	if (!result_u)
 		return;
 
-	wchar_t *ures = new wchar_t[result_u];
+	wchar_t *ures = (wchar_t *) malloc(result_u*sizeof(wchar_t));
 
 	if(!MultiByteToWideChar(from_cp,0,str,-1,ures,result_u))
 	{
-		delete[] ures;
+		free(ures);
 		return;
 	}
 
@@ -2922,21 +2911,21 @@ void cp_to_utf8(char *out_text, const char *str, int from_cp, size_t size)
 
 	if(!result_c)
 	{
-		delete [] ures;
+		free(ures);
 		return;
 	}
 
-	char *cres = new char[result_c];
+	char *cres = (char *) malloc(result_c);
 
 	if(!WideCharToMultiByte(CP_UTF8,0,ures,-1,cres,result_c,0,0))
 	{
-		delete[] cres;
+		free(cres);
 		return;
 	}
-	delete[] ures;
+	free(ures);
 
 	strcpy_s(out_text, size, cres);
-	delete[] cres;
+	free(cres);
 	return;
 #endif
 }
@@ -2951,11 +2940,11 @@ void utf8_to_cp(char *out_text, const char *str, int to_cp, size_t size)
 	if (!result_u)
 		return;
 
-	wchar_t *ures = new wchar_t[result_u];
+	wchar_t *ures = (wchar_t *) malloc(sizeof(wchar_t)*result_u);
 
 	if(!MultiByteToWideChar(CP_UTF8,0,str,-1,ures,result_u))
 	{
-		delete[] ures;
+		free(ures);
 		return;
 	}
 
@@ -2963,20 +2952,20 @@ void utf8_to_cp(char *out_text, const char *str, int to_cp, size_t size)
 
 	if(!result_c)
 	{
-		delete [] ures;
+		free(ures);
 		return;
 	}
 
-	char *cres = new char[result_c];
+	char *cres = (char *) malloc(result_c);
 
 	if(!WideCharToMultiByte(to_cp,0,ures,-1,cres,result_c,0,0))
 	{
-		delete[] cres;
+		free(cres);
 		return;
 	}
-	delete[] ures;
+	free(ures);
 	strcpy_s(out_text, size, cres);
-	delete[] cres;
+	free(cres);
 	return;
 #endif
 }
@@ -2986,7 +2975,7 @@ void create_new_table(MYSQL * const pmysql, SOCKET * const ns)
 	char *cmd;//[MAX_BUFF_SIZE];
 	MYSQL_RES *res_col, *res_inf;
 	MYSQL_ROW row_col, row_inf;
-	int num_col, num_inf;
+	int num_col=0, num_inf=0;
 	int i;
 	char tab_id[16];
 	char table_name[128];
@@ -3007,17 +2996,17 @@ void create_new_table(MYSQL * const pmysql, SOCKET * const ns)
 	char *columns_sql_buff[MAX_COLUMNS_IN_TABLE];
 	int len;
 
-	cmd = new char[MAX_BUFF_SIZE];
-	column_buff = new char[MAX_BUFF_SIZE];
-	main_tab = new char[MAX_BUFF_SIZE];
-	tab_info_name = new char[MAX_BUFF_SIZE];
-	tab_info_values = new char[MAX_BUFF_SIZE];
-	tab_columns_name = new char[MAX_BUFF_SIZE];
-	tab_columns_values = new char[MAX_BUFF_SIZE];
-	tab_default_name = new char[MAX_BUFF_SIZE];
-	tab_default_values = new char[MAX_BUFF_SIZE];
-	all_tables_name = new char[MAX_BUFF_SIZE];
-	all_tables_values = new char[MAX_BUFF_SIZE];
+	cmd = (char *) malloc(MAX_BUFF_SIZE);
+	column_buff = (char *) malloc(MAX_BUFF_SIZE);
+	main_tab = (char *) malloc(MAX_BUFF_SIZE);
+	tab_info_name = (char *) malloc(MAX_BUFF_SIZE);
+	tab_info_values = (char *) malloc(MAX_BUFF_SIZE);
+	tab_columns_name = (char *) malloc(MAX_BUFF_SIZE);
+	tab_columns_values = (char *) malloc(MAX_BUFF_SIZE);
+	tab_default_name = (char *) malloc(MAX_BUFF_SIZE);
+	tab_default_values = (char *) malloc(MAX_BUFF_SIZE);
+	all_tables_name = (char *) malloc(MAX_BUFF_SIZE);
+	all_tables_values = (char *) malloc(MAX_BUFF_SIZE);
 	memset(columns_sql_buff, 0, sizeof(columns_sql_buff));
 	memset(value_of_select, 0, sizeof(value_of_select));
 	//инициализируем в этом месте для макроса FREE_ALL_VARS
@@ -3229,7 +3218,7 @@ new_col_select_value\
 					strcat_s(column_buff, MAX_BUFF_SIZE, "<input type=\"submit\" form=\"mega_form\" value=\"Сохранить\" />");
 				}
 				else
-					strcat_s(column_buff, MAX_BUFF_SIZE, row_inf[i]);
+					strcat_s(column_buff, MAX_BUFF_SIZE-strlen(column_buff), row_inf[i]);
 				break;
 			case 4: //char код кнопки '+'
 				if(row_inf[i] == NULL)
@@ -3243,7 +3232,7 @@ new_col_select_value\
 					strcat_s(column_buff, MAX_BUFF_SIZE, "</p>");
 				}
 				else
-					strcat_s(column_buff, MAX_BUFF_SIZE, row_inf[i]);
+					strcat_s(column_buff, MAX_BUFF_SIZE-strlen(column_buff), row_inf[i]);
 
 				if(column_index_tab_info_name)
 				{
@@ -3966,9 +3955,9 @@ new_col_select_value\
 					//заносим буфер (если он не пуст) в переменную с выбором
 					if(strlen(column_buff) > 0)
 					{
-						value_of_select[value_of_select_index][0] = new char[strlen(column_name)+1];
+						value_of_select[value_of_select_index][0] = (char *) malloc(strlen(column_name)+1);
 						strcpy_s(value_of_select[value_of_select_index][0], strlen(column_name)+1, column_name);
-						value_of_select[value_of_select_index][1] = new char[strlen(column_buff)+1];
+						value_of_select[value_of_select_index][1] = (char *) malloc(strlen(column_buff)+1);
 						strcpy_s(value_of_select[value_of_select_index][1], strlen(column_buff)+1, column_buff);
 
 						value_of_select_index++;
@@ -3985,7 +3974,7 @@ new_col_select_value\
 		strcat_s(cmd, MAX_BUFF_SIZE-strlen(cmd), ",tab_id)");
 		strcat_s(cmd, MAX_BUFF_SIZE-strlen(cmd), tab_columns_values);
 		len = strlen(tab_columns_values)+TAB_BUFF_UP;
-		columns_sql_buff[column_index] = new char[len];
+		columns_sql_buff[column_index] = (char *) malloc(len);
 		memset(columns_sql_buff[column_index], 0, len);
 		strcpy_s(columns_sql_buff[column_index], len-1, cmd); //теперь columns_sql_buff содержит почти готовый запрос
 		column_index++;
@@ -3996,7 +3985,7 @@ new_col_select_value\
 VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d cols=%d onChange=\"myreq(&#039;%s_%d&#039;)\">%s</textarea></td>\
 ','<td align=center><h4>%s</h4></td>','Ключ',4,0,1,0,0");
 	len = strlen(cmd)+TAB_BUFF_UP;
-	columns_sql_buff[column_index] = new char[len];
+	columns_sql_buff[column_index] = (char *) malloc(len);
 	memset(columns_sql_buff[column_index], 0, len);
 	strcpy_s(columns_sql_buff[column_index], len-1, cmd); //теперь columns_sql_buff содержит почти готовый запрос
 	column_index++;
@@ -4084,7 +4073,7 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 
 	//дополняем all_tables кнопкой для удаления таблицы
 	memset(cmd, 0, MAX_BUFF_SIZE);
-	sprintf_s(cmd, MAX_BUFF_SIZE, "UPDATE all_tables SET delete_button=\"<input type='button' value='Удалить' form='frm' onclick=\\\"del_tab('delete_table','tab_name_%s')\\\" />\" WHERE id=%s", tab_id, tab_id);
+	sprintf_s(cmd, MAX_BUFF_SIZE, "UPDATE all_tables SET delete_button=\"<input type='button' value='Delete' form='frm' onclick=\\\"del_tab('delete_table','tab_name_%s')\\\" />\" WHERE id=%s", tab_id, tab_id);
 	fprintf(stderr, "%s\n\n",cmd);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
@@ -4146,9 +4135,9 @@ VALUES('id',0,'<td><textarea form=\"frm\" id=\"%s_%d\" name=\"%s[%d]\" rows=%d c
 		}
 	}
 
-//	fprintf(stderr, "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n", 
-//					main_tab,tab_info_name,tab_info_values,tab_columns_name,tab_columns_values,
-//					all_tables_name,all_tables_values,tab_default_name,tab_default_values);
+//	fprintf(stderr, "%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n%s\n\n",
+//			 main_tab,tab_info_name,tab_info_values,tab_columns_name,tab_columns_values,
+//			 all_tables_name,all_tables_values,tab_default_name,tab_default_values);
 
 	FREE_ALL_VARS;
 	return;
@@ -4161,14 +4150,14 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 //	MYSQL_ROW row_inf;
 //	int num_inf;
 
-	cmd = new char[MAX_BUFF_SIZE];
+	cmd = (char *) malloc(MAX_BUFF_SIZE);
 	memset(cmd, 0, MAX_BUFF_SIZE);
 
 	//удаляем описание столбцов таблицы
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_columns WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
@@ -4177,7 +4166,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_info WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
@@ -4186,7 +4175,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_selects WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
@@ -4195,7 +4184,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM tab_dynamic WHERE tab_id=(SELECT id FROM all_tables WHERE tab_name=\"%s\")", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 	memset(cmd, 0, MAX_BUFF_SIZE);
@@ -4204,7 +4193,7 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DELETE FROM all_tables WHERE tab_name=\"%s\"", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
@@ -4212,9 +4201,10 @@ void delete_table(char const * const table_name, MYSQL * const pmysql, SOCKET * 
 	sprintf_s(cmd, MAX_BUFF_SIZE, "DROP TABLE %s", table_name);
 	if(mysql_query(pmysql, cmd) != 0)
 	{
-		delete [] cmd;
+		free(cmd);
 		mysql_error_thread_exit(pmysql, ns);
 	}
 
-	delete [] cmd;
+	free(cmd);
 }
+
